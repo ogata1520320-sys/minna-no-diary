@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>みんなの日記</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div id="app">
+    <header class="app-header">
+      <h1>みんなの日記</h1>
+    </header>
+
+    <main class="container">
+      <section id="login-screen" class="card">
+        <h2>ログイン</h2>
+
+        <form id="login-form">
+          <label for="user-id">ユーザーID</label>
+          <input
+            type="text"
+            id="user-id"
+            autocomplete="username"
+            required
+          >
+
+          <label for="password">パスワード</label>
+          <input
+            type="password"
+            id="password"
+            autocomplete="current-password"
+            required
+          >
+
+          <button type="submit">ログイン</button>
+        </form>
+
+        <p id="login-message" class="message"></p>
+      </section>
+
+      <section id="home-screen" class="hidden">
+        <div class="card">
+          <h2>ホーム</h2>
+          <p id="welcome-message"></p>
+
+          <button id="logout-button" class="secondary-button">
+            ログアウト
+          </button>
+        </div>
+
+        <div class="card">
+          <h2>日記</h2>
+          <p>ここに日記一覧を表示します。</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>
