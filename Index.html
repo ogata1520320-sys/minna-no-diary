@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+  <title>みんなの日記</title>
+  <style>
+    :root{--bg:#f5f6f8;--surface:#fff;--text:#17181b;--sub:#7b8088;--line:#e7e9ed;--accent:#22252a;--danger:#d92d20;--dangerBg:#fff1f0;--draft:#876700;--draftBg:#fff8d8;--blue:#2563eb;--blueBg:#eef4ff;--radius:18px}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
+    body{overscroll-behavior-y:none}button,input,textarea{font:inherit}button{border:0;cursor:pointer;touch-action:manipulation}.hidden{display:none!important}
+    .app{width:100%;max-width:520px;min-height:100vh;margin:0 auto;background:var(--bg)}.screen{min-height:100vh}
+    .login-screen{min-height:100vh;display:flex;align-items:center;padding:28px 20px;background:linear-gradient(180deg,#fff,#f5f6f8)}
+    .login-card{width:100%;background:#fff;border:1px solid #e0e3e8;border-radius:28px;padding:26px 20px;box-shadow:0 6px 24px rgba(20,24,32,.06)}
+    .brand-mark{width:58px;height:58px;display:flex;align-items:center;justify-content:center;border-radius:18px;background:var(--accent);color:#fff;font-size:28px;margin-bottom:18px}
+    .logo{font-size:29px;font-weight:900;letter-spacing:-.04em;margin:0 0 5px}.login-sub{color:var(--sub);font-size:14px;margin-bottom:24px}
+    .label{display:block;font-size:13px;font-weight:700;color:#5f646d;margin:16px 0 7px}.input,.textarea{width:100%;border:1px solid #dfe2e7;border-radius:14px;background:#fff;color:var(--text);outline:none;font-size:16px}.input{height:50px;padding:0 14px}.textarea{min-height:250px;padding:14px;resize:vertical;line-height:1.75}
+    .input:focus,.textarea:focus{border-color:#aab0b9;box-shadow:0 0 0 3px rgba(30,35,42,.06)}
+    .btn{min-height:48px;border-radius:14px;padding:12px 16px;background:var(--accent);color:#fff;font-weight:800;font-size:15px}.btn:disabled{opacity:.52}.btn.secondary{background:#eceef2;color:var(--text)}.btn.danger{background:var(--dangerBg);color:var(--danger)}.btn.draft{background:var(--draftBg);color:var(--draft)}.btn.small{min-height:36px;padding:7px 10px;border-radius:10px;font-size:12px}.full{width:100%}
+    .top{position:sticky;top:0;z-index:20;min-height:58px;padding:8px 12px;display:grid;grid-template-columns:56px 1fr 56px;align-items:center;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-bottom:1px solid #e5e7eb}.top h1{margin:0;text-align:center;font-size:17px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.top-spacer{width:56px}.back-btn{width:40px;height:40px;border-radius:12px;background:#eef0f3;color:var(--text);font-size:22px;font-weight:700}
+    .content{padding:16px 14px calc(92px + env(safe-area-inset-bottom))}
+    .hero{background:linear-gradient(145deg,#22252a,#3a3e45);color:#fff;border-radius:24px;padding:22px;box-shadow:0 12px 34px rgba(20,23,28,.16);margin-bottom:14px}.hero-kicker{font-size:12px;opacity:.7;margin-bottom:5px}.hero-name{margin:0 0 20px;font-size:25px}.hero-actions{display:grid;grid-template-columns:1.25fr .75fr;gap:10px}.hero-btn{min-height:56px;border-radius:16px;font-weight:850;font-size:15px}.hero-btn.primary{background:#fff;color:#17181b}.hero-btn.ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.16)}
+    .shortcut-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}.shortcut{min-height:72px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:18px;display:flex;align-items:center;gap:10px;text-align:left;position:relative}.shortcut-icon{width:40px;height:40px;flex:0 0 auto;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#f0f2f5;font-size:18px}.shortcut-icon.draft{background:var(--draftBg)}.shortcut-icon.notification{background:var(--blueBg)}.shortcut-title{font-weight:850;font-size:13px}.shortcut-note{color:var(--sub);font-size:10px;margin-top:2px}.badge{position:absolute;top:8px;right:8px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:#e11d48;color:#fff;font-size:10px;font-weight:900}
+    .section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 2px 12px}.section-title{margin:0;font-size:18px;font-weight:900}.section-note{color:var(--sub);font-size:12px}
+    .filter-tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:5px;margin-bottom:14px;background:#e9ebef;border-radius:15px}.filter-tab{min-height:42px;border-radius:11px;background:transparent;color:#777c84;font-size:13px;font-weight:800}.filter-tab.active{background:#fff;color:#17181b;box-shadow:0 2px 7px rgba(20,24,32,.07)}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}.diary-list,.notification-list{display:flex;flex-direction:column;gap:10px}.diary{padding:15px;cursor:pointer;display:grid;grid-template-columns:42px 1fr 22px;gap:11px;align-items:center}.diary.draft-card{border-color:#ece4b8;background:#fffef8}.diary-icon{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:#f0f2f5;font-size:19px}.draft-card .diary-icon{background:var(--draftBg)}.diary-main{min-width:0}.diary-title{font-weight:850;font-size:15px;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.diary-meta{color:var(--sub);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.draft-label,.mine-label{display:inline-block;padding:2px 7px;margin-right:5px;border-radius:8px;font-size:10px;font-weight:900}.draft-label{background:var(--draftBg);color:var(--draft)}.mine-label{background:#edf1f6;color:#4b5563}.chevron{color:#b1b5bc;font-size:20px}.empty{padding:34px 18px;text-align:center;color:var(--sub)}.empty-icon{font-size:30px;margin-bottom:8px}
+    .search-wrap{position:sticky;top:58px;z-index:10;background:var(--bg);padding:2px 0 12px}.search{display:grid;grid-template-columns:1fr auto;gap:8px;padding:7px;background:#fff;border:1px solid var(--line);border-radius:17px}.search .input{border:0;background:#f5f6f8;height:44px}.search .btn{min-height:44px;padding:0 16px}
+    .detail-meta{display:flex;align-items:center;gap:10px;padding:4px 2px 12px}.avatar,.comment-avatar{border-radius:50%;background:#e9ebef;display:flex;align-items:center;justify-content:center;font-weight:900}.avatar{width:36px;height:36px}.comment-avatar{width:32px;height:32px;flex:0 0 auto;font-size:12px}.detail-author{font-size:14px;font-weight:800}.muted{font-size:12px;color:var(--sub)}.status-banner{padding:11px 13px;margin-bottom:12px;border-radius:13px;background:var(--draftBg);color:var(--draft);font-size:12px;font-weight:800}.article{padding:18px;line-height:1.9;white-space:pre-wrap;word-break:break-word;font-size:15px;margin-bottom:12px}.action-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:18px}
+    .comments-card{padding:16px}.comments-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}.comments-title{margin:0;font-size:16px;font-weight:900}.comment-count{min-width:26px;height:26px;padding:0 8px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:#eef0f3;color:#565b64;font-size:11px;font-weight:900}.comment{padding:14px 0;border-top:1px solid #eef0f2}.comment:first-of-type{border-top:0}.comment-head{display:flex;align-items:center;gap:9px;margin-bottom:7px}.comment-head-main{min-width:0;flex:1}.comment-author-row{display:flex;align-items:center;gap:6px}.comment-author{font-size:13px;font-weight:850}.comment-own{padding:2px 6px;border-radius:7px;background:#edf1f6;color:#59606a;font-size:9px;font-weight:900}.comment-body{margin-left:41px;padding-right:4px;white-space:pre-wrap;word-break:break-word;line-height:1.7;font-size:14px}.comment-actions{text-align:right;margin-top:7px}.comment-compose{margin-top:12px;padding-top:14px;border-top:1px solid #eef0f2}.comment-box{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.comment-input{width:100%;min-height:54px;max-height:150px;resize:none;border:1px solid #dfe2e7;border-radius:14px;padding:11px 13px;background:#f8f9fa;color:var(--text);outline:none;font-size:16px;line-height:1.45}.comment-send{min-width:68px;height:46px;min-height:46px;padding:0 14px;border-radius:13px}.comment-hint{margin-top:6px;color:#a0a4aa;font-size:10px;text-align:right}
+    .notification-item{padding:15px;display:grid;grid-template-columns:42px 1fr 20px;align-items:center;gap:11px;cursor:pointer}.notification-item.unread{border-color:#dbe6ff;background:#f9fbff}.notification-icon{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:var(--blueBg);font-size:19px}.notification-main{min-width:0}.notification-message{font-size:14px;font-weight:750;line-height:1.5;word-break:break-word}.notification-time{margin-top:4px;color:var(--sub);font-size:11px}.unread-dot{width:9px;height:9px;border-radius:50%;background:var(--blue);justify-self:center}.read-dot{width:9px;height:9px}.mark-all{background:transparent;color:var(--blue);font-size:12px;font-weight:800;padding:8px}
+    .editor-card{padding:17px}.editor-help{margin-top:6px;font-size:12px;color:var(--sub)}.save-bar{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom));z-index:8;padding-top:12px;background:linear-gradient(180deg,rgba(245,246,248,0),#f5f6f8 34%)}.editor-buttons{display:grid;grid-template-columns:.9fr 1.1fr;gap:9px}
+    .nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);z-index:30;width:min(520px,100%);height:calc(70px + env(safe-area-inset-bottom));padding:6px 20px env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(3,1fr);background:rgba(255,255,255,.96);border-top:1px solid #e2e5ea}.nav button{background:transparent;color:#969ba3;border-radius:14px;font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}.nav-icon{min-width:36px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:12px;font-size:20px}.nav button.active{color:var(--text)}.nav button.active .nav-icon{background:#eceef2}
+    .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:100;max-width:calc(100% - 36px);padding:11px 15px;border-radius:13px;background:#191b1f;color:#fff;font-size:13px}.error{padding:11px 12px;margin-bottom:13px;border-radius:12px;background:#fff1f0;color:#b42318;border:1px solid #ffc9c5;font-size:13px}.loading{padding:45px 16px;text-align:center;color:var(--sub);font-size:13px}.spinner{width:24px;height:24px;margin:0 auto 10px;border:3px solid #e2e5e9;border-top-color:#45494f;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.more-area{padding-top:14px}.more-info{text-align:center;font-size:11px;color:#9b9fa6;margin-top:8px}.logout-link{width:100%;margin-top:14px;background:transparent;color:#969ba3;font-size:12px;font-weight:700;padding:8px}.version{text-align:center;color:#b0b4bb;font-size:10px;padding:18px 0 4px}
+  </style>
+</head>
+<body>
+<div class="app">
+  <section id="loginScreen" class="screen">
+    <div class="login-screen"><div class="login-card">
+      <div class="brand-mark">📖</div><h1 class="logo">みんなの日記</h1><div class="login-sub">今日のことを、気軽に残そう。</div>
+      <div id="loginError" class="error hidden"></div>
+      <label class="label">ユーザーID</label><input id="loginId" class="input" autocomplete="username" placeholder="IDを入力">
+      <label class="label">パスワード</label><input id="loginPass" class="input" type="password" autocomplete="current-password" placeholder="パスワードを入力">
+      <button id="loginBtn" type="button" class="btn full" style="margin-top:18px">ログイン</button>
+      <button id="toRegisterBtn" type="button" class="btn secondary full" style="margin-top:9px">はじめての方はこちら</button>
+      <div class="version">APP / 90DAY LOGIN</div>
+    </div></div>
+  </section>
+
+  <section id="registerScreen" class="screen hidden">
+    <div class="top"><button id="backLoginBtn" type="button" class="back-btn">‹</button><h1>アカウント作成</h1><div class="top-spacer"></div></div>
+    <div class="content"><div class="card editor-card">
+      <div id="registerError" class="error hidden"></div>
+      <label class="label">ユーザーID</label><input id="regId" class="input" placeholder="英数字・_・- / 3〜30文字">
+      <label class="label">表示名</label><input id="regName" class="input" placeholder="日記に表示する名前">
+      <label class="label">パスワード</label><input id="regPass" class="input" type="password" placeholder="6文字以上">
+      <label class="label">パスワード確認</label><input id="regPass2" class="input" type="password" placeholder="もう一度入力">
+      <button id="registerBtn" type="button" class="btn full" style="margin-top:18px">アカウントを作成</button>
+    </div></div>
+  </section>
+
+  <section id="mainScreen" class="screen hidden">
+    <div id="view"></div>
+    <nav class="nav">
+      <button type="button" data-page="home"><span class="nav-icon">⌂</span><span>ホーム</span></button>
+      <button type="button" data-page="write"><span class="nav-icon">＋</span><span>書く</span></button>
+      <button type="button" data-page="diaries"><span class="nav-icon">☰</span><span>日記</span></button>
+    </nav>
+  </section>
+</div>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+(function(){
+'use strict';
+
+var PAGE_STEP=20, MAX_LIST=100;
+var token='', me=null, currentDiary=null, editingId=null;
+var diaryCache=[], draftCache=[], notificationCache=[];
+var currentFilter='all', currentLimit=PAGE_STEP, hasMore=false, busy=false, backGuardReady=false;
+var listCache={all:null,mine:null};
+var listLimitCache={all:PAGE_STEP,mine:PAGE_STEP};
+var listHasMoreCache={all:false,mine:false};
+var $=function(id){return document.getElementById(id)};
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function fmt(s){if(!s)return '';try{return new Date(s).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}catch(e){return String(s)}}
+function initial(name){var s=String(name||'?').trim();return esc(s?s.slice(0,1):'?')}
+
+function lsGet(key){try{return localStorage.getItem(key)}catch(e){return null}}
+function lsSet(key,val){try{localStorage.setItem(key,val);return true}catch(e){return false}}
+function lsRemove(key){try{localStorage.removeItem(key)}catch(e){}}
+
+function idbOpen(){
+  return new Promise(function(resolve,reject){
+    if(!window.indexedDB){reject(new Error('IndexedDB unavailable'));return}
+    var req=indexedDB.open('DiaryAppAuthDB',1);
+    req.onupgradeneeded=function(){
+      var db=req.result;
+      if(!db.objectStoreNames.contains('auth')) db.createObjectStore('auth');
+    };
+    req.onsuccess=function(){resolve(req.result)};
+    req.onerror=function(){reject(req.error||new Error('IndexedDB error'))};
+  });
+}
+async function idbSet(key,val){
+  try{
+    var db=await idbOpen();
+    await new Promise(function(resolve,reject){
+      var tx=db.transaction('auth','readwrite');
+      tx.objectStore('auth').put(val,key);
+      tx.oncomplete=resolve;tx.onerror=function(){reject(tx.error)};
+    });
+    db.close(); return true;
+  }catch(e){return false}
+}
+async function idbGet(key){
+  try{
+    var db=await idbOpen();
+    var val=await new Promise(function(resolve,reject){
+      var tx=db.transaction('auth','readonly');
+      var req=tx.objectStore('auth').get(key);
+      req.onsuccess=function(){resolve(req.result||'')};
+      req.onerror=function(){reject(req.error)};
+    });
+    db.close(); return val||'';
+  }catch(e){return ''}
+}
+async function idbRemove(key){
+  try{
+    var db=await idbOpen();
+    await new Promise(function(resolve,reject){
+      var tx=db.transaction('auth','readwrite');
+      tx.objectStore('auth').delete(key);
+      tx.oncomplete=resolve;tx.onerror=function(){reject(tx.error)};
+    });
+    db.close();
+  }catch(e){}
+}
+
+async function persistToken(value){
+  token=String(value||'');
+  lsSet('diary_token',token);
+  await idbSet('diary_token',token);
+}
+async function recoverToken(){
+  var local=lsGet('diary_token')||'';
+  if(local){await idbSet('diary_token',local);return local}
+  var dbToken=await idbGet('diary_token');
+  if(dbToken){lsSet('diary_token',dbToken);return dbToken}
+  return '';
+}
+async function clearSavedToken(){
+  lsRemove('diary_token');
+  await idbRemove('diary_token');
+}
+function isAuthError(msg){
+  msg=String(msg||'');
+  return msg.indexOf('ログイン期限')>=0||msg.indexOf('ログインしてください')>=0||msg.indexOf('利用できません')>=0;
+}
+
+function enableBackGuard(){
+  if(backGuardReady)return;
+  backGuardReady=true;
+  try{
+    history.replaceState({diaryApp:true},'',location.href);
+    history.pushState({diaryAppGuard:true},'',location.href);
+  }catch(e){}
+}
+window.addEventListener('popstate',function(){
+  if(!token)return;
+  try{history.pushState({diaryAppGuard:true},'',location.href)}catch(e){}
+  currentDiary=null;editingId=null;renderHome();
+});
+
+function showError(id,msg){var box=$(id);if(!box)return;box.textContent=String(msg||'');box.classList.remove('hidden')}
+function clearError(id){var box=$(id);if(!box)return;box.textContent='';box.classList.add('hidden')}
+function toast(msg){var box=$('toast');box.textContent=String(msg||'');box.classList.remove('hidden');clearTimeout(toast.timer);toast.timer=setTimeout(function(){box.classList.add('hidden')},1800)}
+
+function server(name,args){
+  args=args||[];
+  return new Promise(function(resolve,reject){
+    if(!window.google||!google.script||!google.script.run){reject(new Error('GASのWebアプリURLから開いてください。'));return}
+    try{
+      var runner=google.script.run.withSuccessHandler(resolve).withFailureHandler(function(e){reject(new Error(e&&e.message?e.message:String(e)))});
+      runner[name].apply(runner,args);
+    }catch(e){reject(e)}
+  });
+}
+
+function invalidateDiaryListCache(){
+  listCache={all:null,mine:null};
+  listLimitCache={all:PAGE_STEP,mine:PAGE_STEP};
+  listHasMoreCache={all:false,mine:false};
+  currentLimit=PAGE_STEP;hasMore=false;
+}
+function showLogin(){$('loginScreen').classList.remove('hidden');$('registerScreen').classList.add('hidden');$('mainScreen').classList.add('hidden')}
+function showRegister(){clearError('registerError');$('loginScreen').classList.add('hidden');$('registerScreen').classList.remove('hidden');$('mainScreen').classList.add('hidden')}
+function showMain(){$('loginScreen').classList.add('hidden');$('registerScreen').classList.add('hidden');$('mainScreen').classList.remove('hidden')}
+function setActive(page){document.querySelectorAll('.nav button[data-page]').forEach(function(b){b.classList.toggle('active',b.dataset.page===page)})}
+function header(title,back){return '<div class="top">'+(back?'<button type="button" class="back-btn" data-action="'+back+'">‹</button>':'<div class="top-spacer"></div>')+'<h1>'+esc(title)+'</h1><div class="top-spacer"></div></div>'}
+
+function cards(list){
+  list=(list||[]).filter(function(d){return !d.status||d.status==='published'});
+  if(!list.length)return '<div class="card empty"><div class="empty-icon">📭</div><div>'+(currentFilter==='mine'?'まだ自分の日記はありません':'まだ日記がありません')+'</div></div>';
+  return '<div class="diary-list">'+list.map(function(d){
+    return '<div class="card diary" data-diary-id="'+esc(d.diaryId)+'"><div class="diary-icon">📝</div><div class="diary-main"><div class="diary-title">'+(d.own?'<span class="mine-label">自分</span>':'')+esc(d.title)+'</div><div class="diary-meta">'+esc(d.name)+' ・ '+esc(fmt(d.updatedAt))+'</div></div><div class="chevron">›</div></div>';
+  }).join('')+'</div>';
+}
+function draftCards(list){
+  list=list||[];
+  if(!list.length)return '<div class="card empty"><div class="empty-icon">✏️</div><div>下書きはありません</div></div>';
+  return '<div class="diary-list">'+list.map(function(d){
+    return '<div class="card diary draft-card" data-draft-id="'+esc(d.diaryId)+'"><div class="diary-icon">✏️</div><div class="diary-main"><div class="diary-title"><span class="draft-label">下書き</span>'+esc(d.title||'無題')+'</div><div class="diary-meta">最終更新 '+esc(fmt(d.updatedAt))+'</div></div><div class="chevron">›</div></div>';
+  }).join('')+'</div>';
+}
+function unreadCount(){return notificationCache.filter(function(n){return !n.read}).length}
+function notificationCards(list){
+  list=list||[];
+  if(!list.length)return '<div class="card empty"><div class="empty-icon">🔔</div><div>通知はありません</div></div>';
+  return '<div class="notification-list">'+list.map(function(n){
+    return '<div class="card notification-item '+(!n.read?'unread':'')+'" data-notification-id="'+esc(n.notificationId)+'" data-notification-diary="'+esc(n.diaryId)+'"><div class="notification-icon">💬</div><div class="notification-main"><div class="notification-message">'+esc(n.message)+'</div><div class="notification-time">'+esc(fmt(n.createdAt))+'</div></div>'+(!n.read?'<div class="unread-dot"></div>':'<div class="read-dot"></div>')+'</div>';
+  }).join('')+'</div>';
+}
+
+async function login(){
+  if(busy)return;
+  clearError('loginError');
+  var id=$('loginId').value.trim(),pass=$('loginPass').value;
+  if(!id||!pass){showError('loginError','IDとパスワードを入力してください。');return}
+  busy=true;$('loginBtn').disabled=true;$('loginBtn').textContent='ログイン中…';
+  try{
+    var result=await server('login',[id,pass]);
+    me=result.user;
+    await persistToken(result.token);
+    await loadHome();
+  }catch(e){
+    token='';
+    showError('loginError',e.message);
+  }finally{
+    busy=false;$('loginBtn').disabled=false;$('loginBtn').textContent='ログイン';
+  }
+}
+async function register(){
+  if(busy)return;
+  clearError('registerError');
+  var id=$('regId').value.trim(),name=$('regName').value.trim(),password=$('regPass').value,password2=$('regPass2').value;
+  if(password!==password2){showError('registerError','パスワードが一致しません。');return}
+  busy=true;$('registerBtn').disabled=true;$('registerBtn').textContent='作成中…';
+  try{
+    await server('registerUser',[id,password,name]);
+    $('loginId').value=id;$('loginPass').value='';showLogin();toast('アカウントを作成しました。');
+  }catch(e){showError('registerError',e.message)}
+  finally{busy=false;$('registerBtn').disabled=false;$('registerBtn').textContent='アカウントを作成'}
+}
+
+async function loadHome(){
+  try{
+    var data=await server('getBootstrap',[token]);
+    me=data.user;
+    var allData=data.diaries||[];
+    notificationCache=data.notifications||[];
+    draftCache=allData.filter(function(d){return d.own&&d.status==='draft'});
+    var publicAll=allData.filter(function(d){return !d.status||d.status==='published'});
+    diaryCache=publicAll.slice(0,PAGE_STEP);
+    listCache.all=diaryCache.slice();listLimitCache.all=PAGE_STEP;listHasMoreCache.all=publicAll.length>PAGE_STEP;
+    listCache.mine=null;listLimitCache.mine=PAGE_STEP;listHasMoreCache.mine=false;
+    currentFilter='all';currentLimit=PAGE_STEP;hasMore=listHasMoreCache.all;
+    await persistToken(token);
+    showMain();enableBackGuard();renderHome();
+  }catch(e){
+    if(isAuthError(e.message)){
+      await clearSavedToken();token='';me=null;showLogin();showError('loginError','ログイン期限が切れました。もう一度ログインしてください。');
+    }else{
+      showLogin();showError('loginError','通信に失敗しました。再読み込みしてください。ログイン情報は保持されています。');
+    }
+  }
+}
+function renderHome(){
+  setActive('home');
+  var recent=listCache.all||diaryCache||[],unread=unreadCount();
+  $('view').innerHTML=header('ホーム','')+'<div class="content"><section class="hero"><div class="hero-kicker">WELCOME BACK</div><h2 class="hero-name">'+esc(me?me.name:'')+'さん</h2><div class="hero-actions"><button type="button" class="hero-btn primary" data-action="write">＋ 日記を書く</button><button type="button" class="hero-btn ghost" data-action="diaries">一覧へ</button></div></section><div class="shortcut-grid"><button type="button" class="shortcut" data-action="drafts"><div class="shortcut-icon draft">✏️</div><div><div class="shortcut-title">下書き</div><div class="shortcut-note">'+draftCache.length+'件保存中</div></div></button><button type="button" class="shortcut" data-action="notifications"><div class="shortcut-icon notification">🔔</div><div><div class="shortcut-title">通知</div><div class="shortcut-note">'+(unread?unread+'件の未読':'新しい通知なし')+'</div></div>'+(unread?'<div class="badge">'+(unread>99?'99+':unread)+'</div>':'')+'</button></div><div class="section-head"><div><h3 class="section-title">最近の日記</h3><div class="section-note">新しい順に表示</div></div></div>'+cards(recent.slice(0,5))+'<button type="button" class="logout-link" data-action="logout">ログアウト</button><div class="version">APP / 90DAY LOGIN</div></div>';
+}
+
+function renderListShell(){
+  setActive('diaries');
+  var publicList=diaryCache.filter(function(d){return !d.status||d.status==='published'});
+  var moreHtml=hasMore?'<div class="more-area"><button id="moreBtn" type="button" class="btn secondary full" data-action="more">さらに読み込む</button><div class="more-info">現在 '+publicList.length+' 件表示</div></div>':'';
+  $('view').innerHTML=header('みんなの日記','')+'<div class="content"><div class="search-wrap"><div class="search"><input id="searchInput" class="input" placeholder="日記を検索"><button type="button" class="btn" data-action="search">検索</button></div></div><div class="filter-tabs"><button type="button" class="filter-tab '+(currentFilter==='all'?'active':'')+'" data-filter="all">すべて</button><button type="button" class="filter-tab '+(currentFilter==='mine'?'active':'')+'" data-filter="mine">自分の日記</button></div><div id="diaryList">'+cards(publicList)+'</div>'+moreHtml+'</div>';
+}
+async function loadFirstPage(force){
+  if(!force&&listCache[currentFilter]){diaryCache=listCache[currentFilter].slice();currentLimit=listLimitCache[currentFilter];hasMore=listHasMoreCache[currentFilter];renderListShell();return}
+  setActive('diaries');$('view').innerHTML=header('みんなの日記','')+'<div class="loading"><div class="spinner"></div>日記を読み込んでいます</div>';
+  try{
+    currentLimit=PAGE_STEP;
+    var items=await server('listDiaries',[token,currentFilter,currentLimit]);items=items||[];
+    diaryCache=items.filter(function(d){return !d.status||d.status==='published'});
+    hasMore=items.length>=currentLimit&&currentLimit<MAX_LIST;
+    listCache[currentFilter]=diaryCache.slice();listLimitCache[currentFilter]=currentLimit;listHasMoreCache[currentFilter]=hasMore;
+    renderListShell();
+  }catch(e){toast(e.message)}
+}
+async function changeFilter(filter){
+  if(busy||!['all','mine'].includes(filter)||currentFilter===filter)return;
+  currentFilter=filter;
+  if(listCache[currentFilter]){diaryCache=listCache[currentFilter].slice();currentLimit=listLimitCache[currentFilter];hasMore=listHasMoreCache[currentFilter];renderListShell();return}
+  await loadFirstPage(false);
+}
+async function loadMore(){
+  if(busy||!hasMore)return;
+  busy=true;var b=$('moreBtn');if(b){b.disabled=true;b.textContent='読み込み中…'}
+  try{
+    var oldCount=diaryCache.length,nextLimit=Math.min(currentLimit+PAGE_STEP,MAX_LIST);
+    var items=await server('listDiaries',[token,currentFilter,nextLimit]);items=items||[];
+    diaryCache=items.filter(function(d){return !d.status||d.status==='published'});
+    currentLimit=nextLimit;hasMore=!(items.length<=oldCount||items.length<currentLimit||currentLimit>=MAX_LIST);
+    listCache[currentFilter]=diaryCache.slice();listLimitCache[currentFilter]=currentLimit;listHasMoreCache[currentFilter]=hasMore;renderListShell();
+  }catch(e){toast(e.message)}finally{busy=false}
+}
+async function search(){
+  var q=$('searchInput')?$('searchInput').value.trim():'';
+  if(!q){await loadFirstPage(false);return}
+  try{
+    var result=await server('searchDiaries',[token,q]);result=(result||[]).filter(function(d){return !d.status||d.status==='published'});
+    if(currentFilter==='mine')result=result.filter(function(d){return !!d.own});
+    $('diaryList').innerHTML=cards(result);var area=document.querySelector('.more-area');if(area)area.classList.add('hidden');
+  }catch(e){toast(e.message)}
+}
+
+function renderDrafts(){
+  setActive('write');
+  $('view').innerHTML=header('下書き','home')+'<div class="content"><div class="section-head"><div><h3 class="section-title">保存中の下書き</h3><div class="section-note">'+draftCache.length+'件</div></div></div>'+draftCards(draftCache)+'<button type="button" class="btn full" style="margin-top:14px" data-action="write">＋ 新しい日記を書く</button></div>';
+}
+async function openDraft(id){
+  if(busy)return;busy=true;
+  try{currentDiary=await server('getDiary',[token,id]);renderEditor(currentDiary)}catch(e){toast(e.message)}finally{busy=false}
+}
+async function openDiary(id){
+  if(busy)return;busy=true;
+  $('view').innerHTML=header('日記','diaries')+'<div class="loading"><div class="spinner"></div>日記を開いています</div>';
+  try{currentDiary=await server('getDiary',[token,id]);renderDiary()}catch(e){toast(e.message)}finally{busy=false}
+}
+
+function renderComments(comments,diary){
+  comments=comments||[];
+  if(!comments.length)return '<div class="empty" style="padding:24px 8px"><div class="empty-icon">💬</div><div>まだコメントはありません</div></div>';
+  return comments.map(function(c){
+    var own=c.own?'<span class="comment-own">自分</span>':'';
+    var del=(c.own||diary.own)?'<div class="comment-actions"><button type="button" class="btn danger small" data-comment-delete="'+esc(c.commentId)+'">削除</button></div>':'';
+    return '<div class="comment"><div class="comment-head"><div class="comment-avatar">'+initial(c.name)+'</div><div class="comment-head-main"><div class="comment-author-row"><div class="comment-author">'+esc(c.name)+'</div>'+own+'</div><div class="muted">'+esc(fmt(c.createdAt))+'</div></div></div><div class="comment-body">'+esc(c.body)+'</div>'+del+'</div>';
+  }).join('');
+}
+function renderDiary(){
+  var d=currentDiary;
+  if(d.status==='draft'){renderEditor(d);return}
+  var comments=d.comments||[];
+  $('view').innerHTML=header(d.title,'diaries')+'<div class="content"><div class="detail-meta"><div class="avatar">'+initial(d.name)+'</div><div><div class="detail-author">'+esc(d.name)+'</div><div class="muted">'+esc(fmt(d.updatedAt))+'</div></div></div><article class="card article">'+esc(d.body||'')+'</article>'+(d.own?'<div class="action-row"><button type="button" class="btn secondary" data-action="edit">編集する</button><button type="button" class="btn danger" data-action="deleteDiary">削除する</button></div>':'')+'<section class="card comments-card"><div class="comments-header"><h3 class="comments-title">コメント</h3><div class="comment-count">'+comments.length+'</div></div><div id="commentsList">'+renderComments(comments,d)+'</div><div class="comment-compose"><div class="comment-box"><textarea id="commentInput" class="comment-input" maxlength="1000" rows="2" placeholder="コメントを書く"></textarea><button id="commentSendBtn" type="button" class="btn comment-send" data-action="comment">送信</button></div><div class="comment-hint">Enterで改行できます・送信はボタンのみ</div></div></section></div>';
+  setTimeout(autoResizeComment,0);
+}
+function autoResizeComment(){var input=$('commentInput');if(!input)return;input.style.height='auto';input.style.height=Math.min(input.scrollHeight,150)+'px'}
+
+function renderEditor(d){
+  setActive('write');editingId=d?d.diaryId:null;
+  var isDraft=!!(d&&d.status==='draft'),backPage=isDraft?'drafts':'home';
+  $('view').innerHTML=header(isDraft?'下書きを編集':(editingId?'日記を編集':'新しい日記'),backPage)+'<div class="content">'+(isDraft?'<div class="status-banner">✏️ この日記は現在「下書き」です。</div>':'')+'<div class="card editor-card"><label class="label">タイトル</label><input id="editTitle" class="input" maxlength="100" value="'+esc(d?d.title:'')+'" placeholder="タイトルを入力"><label class="label">本文</label><textarea id="editBody" class="textarea" maxlength="30000" placeholder="今日はどんな一日でしたか？">'+esc(d?d.body:'')+'</textarea><div class="editor-help">30,000文字まで入力できます。</div></div><div class="save-bar"><div class="editor-buttons"><button id="draftSaveBtn" type="button" class="btn draft" data-action="saveDraft">下書き保存</button><button id="publishBtn" type="button" class="btn" data-action="publish">'+(isDraft?'公開する':(editingId?'変更を投稿':'日記を投稿'))+'</button></div></div></div>';
+}
+function setSaveStatus(status,loading){
+  var d=$('draftSaveBtn'),p=$('publishBtn');if(!d||!p)return;
+  if(loading){d.disabled=true;p.disabled=true;if(status==='draft')d.textContent='保存中…';else p.textContent='投稿中…';return}
+  d.disabled=false;p.disabled=false;d.textContent='下書き保存';
+  if(currentDiary&&currentDiary.status==='draft')p.textContent='公開する';else if(editingId)p.textContent='変更を投稿';else p.textContent='日記を投稿';
+}
+async function saveDiaryStatus(status){
+  if(busy)return;
+  var title=$('editTitle').value.trim(),body=$('editBody').value;
+  if(status==='published'&&!title){toast('タイトルを入力してください。');return}
+  busy=true;setSaveStatus(status,true);
+  try{
+    currentDiary=await server('saveDiary',[token,{diaryId:editingId,title:title,body:body,status:status}]);
+    editingId=currentDiary.diaryId;invalidateDiaryListCache();
+    draftCache=await server('listDiaries',[token,'drafts',100]);draftCache=draftCache||[];
+    if(status==='draft'){toast('下書きを保存しました。');renderEditor(currentDiary)}else{toast('日記を投稿しました。');renderDiary()}
+  }catch(e){toast(e.message);setSaveStatus(status,false)}finally{busy=false}
+}
+async function deleteDiary(){
+  if(!currentDiary||busy||!confirm('この日記を削除しますか？'))return;
+  busy=true;
+  try{
+    var deletedStatus=currentDiary.status;
+    await server('deleteDiary',[token,currentDiary.diaryId]);
+    currentDiary=null;editingId=null;invalidateDiaryListCache();
+    draftCache=await server('listDiaries',[token,'drafts',100]);draftCache=draftCache||[];
+    toast('削除しました。');
+    if(deletedStatus==='draft')renderDrafts();else await loadFirstPage(true);
+  }catch(e){toast(e.message)}finally{busy=false}
+}
+async function addComment(){
+  if(busy)return;var input=$('commentInput');if(!input)return;
+  var text=input.value.trim();if(!text){toast('コメントを入力してください。');input.focus();return}
+  busy=true;var b=$('commentSendBtn');if(b){b.disabled=true;b.textContent='送信中…'}var original=input.value;
+  try{currentDiary=await server('addComment',[token,currentDiary.diaryId,text]);renderDiary();toast('コメントしました。')}
+  catch(e){input.value=original;autoResizeComment();if(b){b.disabled=false;b.textContent='送信'}toast(e.message)}
+  finally{busy=false}
+}
+async function deleteComment(id){
+  if(busy||!confirm('コメントを削除しますか？'))return;busy=true;
+  try{currentDiary=await server('deleteComment',[token,id]);renderDiary();toast('コメントを削除しました。')}catch(e){toast(e.message)}finally{busy=false}
+}
+
+function renderNotifications(){
+  setActive('home');var unread=unreadCount();
+  $('view').innerHTML=header('通知','home')+'<div class="content"><div class="section-head"><div><h3 class="section-title">コメント通知</h3><div class="section-note">'+(unread?'未読 '+unread+'件':'未読はありません')+'</div></div>'+(unread?'<button type="button" class="mark-all" data-action="markAllNotifications">すべて既読</button>':'')+'</div>'+notificationCards(notificationCache)+'</div>';
+}
+async function openNotification(notificationId,diaryId){
+  if(busy)return;busy=true;
+  try{notificationCache=await server('markNotificationRead',[token,notificationId]);notificationCache=notificationCache||[];currentDiary=await server('getDiary',[token,diaryId]);renderDiary()}catch(e){toast(e.message)}finally{busy=false}
+}
+async function markAllNotifications(){
+  if(busy)return;busy=true;
+  try{notificationCache=await server('markAllNotificationsRead',[token]);notificationCache=notificationCache||[];toast('すべて既読にしました。');renderNotifications()}catch(e){toast(e.message)}finally{busy=false}
+}
+
+async function logout(){
+  var oldToken=token;
+  token='';me=null;currentDiary=null;editingId=null;diaryCache=[];draftCache=[];notificationCache=[];currentFilter='all';invalidateDiaryListCache();backGuardReady=false;
+  await clearSavedToken();
+  try{server('logout',[oldToken])}catch(e){}
+  showLogin();
+}
+function openPage(page){
+  if(page==='home'){currentDiary=null;editingId=null;renderHome();return}
+  if(page==='write'){currentDiary=null;renderEditor(null);return}
+  if(page==='diaries'){loadFirstPage(false);return}
+  if(page==='drafts'){renderDrafts();return}
+  if(page==='notifications'){renderNotifications()}
+}
+
+$('toRegisterBtn').addEventListener('click',showRegister);
+$('backLoginBtn').addEventListener('click',showLogin);
+$('loginBtn').addEventListener('click',login);
+$('registerBtn').addEventListener('click',register);
+$('loginPass').addEventListener('keydown',function(e){if(e.key==='Enter')login()});
+document.querySelector('.nav').addEventListener('click',function(e){var b=e.target.closest('button[data-page]');if(b)openPage(b.dataset.page)});
+$('view').addEventListener('click',function(e){
+  var n=e.target.closest('[data-notification-id]');if(n){openNotification(n.dataset.notificationId,n.dataset.notificationDiary);return}
+  var f=e.target.closest('[data-filter]');if(f){changeFilter(f.dataset.filter);return}
+  var d=e.target.closest('[data-diary-id]');if(d){openDiary(d.dataset.diaryId);return}
+  var dr=e.target.closest('[data-draft-id]');if(dr){openDraft(dr.dataset.draftId);return}
+  var c=e.target.closest('[data-comment-delete]');if(c){deleteComment(c.dataset.commentDelete);return}
+  var b=e.target.closest('[data-action]');if(!b)return;var a=b.dataset.action;
+  if(a==='home')renderHome();else if(a==='write'){currentDiary=null;renderEditor(null)}else if(a==='diaries')loadFirstPage(false);else if(a==='drafts')renderDrafts();else if(a==='notifications')renderNotifications();else if(a==='markAllNotifications')markAllNotifications();else if(a==='more')loadMore();else if(a==='search')search();else if(a==='saveDraft')saveDiaryStatus('draft');else if(a==='publish')saveDiaryStatus('published');else if(a==='edit'&&currentDiary)renderEditor(currentDiary);else if(a==='deleteDiary')deleteDiary();else if(a==='comment')addComment();else if(a==='logout')logout();
+});
+$('view').addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&e.target.id==='searchInput'){e.preventDefault();search()}});
+$('view').addEventListener('input',function(e){if(e.target&&e.target.id==='commentInput')autoResizeComment()});
+
+async function initApp(){
+  token=await recoverToken();
+  if(!token){showLogin();return}
+  showLogin();$('loginBtn').disabled=true;$('loginBtn').textContent='ログイン状態を確認中…';
+  try{await loadHome()}finally{$('loginBtn').disabled=false;$('loginBtn').textContent='ログイン'}
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initApp);else initApp();
+
+})();
+</script>
+</body>
+</html>
