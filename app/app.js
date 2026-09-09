@@ -317,7 +317,9 @@ async function showHome(
 
   showDiaryHome();
 
-  await loadDiaries('all');
+await loadDiaries('all');
+
+requestNotificationPermission();
 
 }
 
@@ -1984,4 +1986,39 @@ if ('serviceWorker' in navigator) {
     }
   );
 
+}
+
+// ==================================================
+// プッシュ通知の許可
+// ==================================================
+
+async function requestNotificationPermission() {
+
+  if (!('Notification' in window)) {
+    console.log('このブラウザは通知に対応していません。');
+    return;
+  }
+
+  if (!('serviceWorker' in navigator)) {
+    console.log('Service Workerに対応していません。');
+    return;
+  }
+
+  if (Notification.permission === 'granted') {
+    console.log('通知はすでに許可されています。');
+    return;
+  }
+
+  if (Notification.permission === 'denied') {
+    console.log('通知が拒否されています。');
+    return;
+  }
+
+  const permission =
+    await Notification.requestPermission();
+
+  console.log(
+    '通知許可状態:',
+    permission
+  );
 }
