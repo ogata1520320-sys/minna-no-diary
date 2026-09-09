@@ -10,16 +10,24 @@
 <body>
 
   <div id="app">
+
     <header class="app-header">
       <h1>みんなの日記</h1>
     </header>
 
     <main class="container">
+
+      <!-- ログイン画面 -->
       <section id="login-screen" class="card">
+
         <h2>ログイン</h2>
 
         <form id="login-form">
-          <label for="user-id">ユーザーID</label>
+
+          <label for="user-id">
+            ユーザーID
+          </label>
+
           <input
             type="text"
             id="user-id"
@@ -27,7 +35,10 @@
             required
           >
 
-          <label for="password">パスワード</label>
+          <label for="password">
+            パスワード
+          </label>
+
           <input
             type="password"
             id="password"
@@ -35,31 +46,277 @@
             required
           >
 
-          <button type="submit">ログイン</button>
+          <button type="submit">
+            ログイン
+          </button>
+
+          <button
+            type="button"
+            id="github-login-button"
+          >
+            GitHubでログイン
+          </button>
+
         </form>
 
-        <p id="login-message" class="message"></p>
+        <p
+          id="login-message"
+          class="message"
+        ></p>
+
       </section>
 
-      <section id="home-screen" class="hidden">
-        <div class="card">
+
+      <!-- ログイン後 -->
+      <section
+        id="home-screen"
+        class="hidden"
+      >
+
+
+        <!-- ==========================
+             一覧画面上部
+             ========================== -->
+
+        <div
+          id="home-user-card"
+          class="card"
+        >
+
           <h2>ホーム</h2>
+
           <p id="welcome-message"></p>
 
-          <button id="logout-button" class="secondary-button">
+          <button
+            type="button"
+            id="logout-button"
+            class="secondary-button"
+          >
             ログアウト
           </button>
+
         </div>
+
+
+        <!-- ==========================
+             日記詳細画面上部
+             タイトル・名前・日時
+             ========================== -->
+
+        <div
+          id="diary-detail-header"
+          class="card hidden"
+        >
+
+          <h2 id="diary-detail-header-title"></h2>
+
+          <div
+            id="diary-detail-header-meta"
+            class="diary-detail-meta"
+          ></div>
+
+        </div>
+
+
+        <!-- ==========================
+             日記エリア
+             ========================== -->
 
         <div class="card">
-          <h2>日記</h2>
-          <p>ここに日記一覧を表示します。</p>
-        </div>
-      </section>
-    </main>
+
+          <h2 id="diary-page-title">
+            日記
+          </h2>
+
+
+          <!-- 日記操作 -->
+          <div class="diary-controls">
+
+            <button
+              type="button"
+              id="all-diaries-button"
+            >
+              みんなの日記
+            </button>
+
+            <button
+              type="button"
+              id="my-diaries-button"
+              class="secondary-button"
+            >
+              自分の日記
+            </button>
+
+          </div>
+
+
+          <!-- 新しく書く -->
+          <button
+            type="button"
+            id="new-diary-button"
+          >
+            ＋ 新しく書く
+          </button>
+
+
+          <div
+            id="diary-message"
+            class="message"
+          ></div>
+
+
+          <!-- ==========================
+               日記一覧
+               ========================== -->
+
+          <div
+            id="diary-list"
+            class="diary-list"
+          ></div>
+
+
+          <!-- ==========================
+               日記本文
+               ========================== -->
+
+          <div
+            id="diary-detail"
+            class="diary-detail hidden"
+          >
+
+            <div
+              id="diary-detail-content"
+              class="diary-detail-content"
+            ></div>
+
+            <!-- コメント欄 -->
+<div
+  id="comments-section"
+  class="comments-section"
+>
+
+  <h3>コメント</h3>
+
+  <!-- コメント一覧 -->
+  <div
+    id="comment-list"
+    class="comment-list"
+  ></div>
+
+  <!-- コメント入力 -->
+  <div class="comment-form">
+
+    <textarea
+      id="comment-input"
+      rows="4"
+      placeholder="コメントを書く"
+    ></textarea>
+
+    <div
+      id="comment-message"
+      class="message"
+    ></div>
+
+    <button
+      type="button"
+      id="comment-submit-button"
+    >
+      コメントする
+    </button>
+
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</div>
+
+            <button
+              type="button"
+              id="diary-detail-back"
+              class="secondary-button"
+            >
+              ← 日記一覧に戻る
+            </button>
+
+          </div>
+
+
+          <!-- ==========================
+               新規日記作成
+               ========================== -->
+
+          <div
+            id="diary-editor"
+            class="diary-detail hidden"
+          >
+
+            <h2>
+              新しい日記
+            </h2>
+
+
+            <div class="form-group">
+
+              <label for="diary-title-input">
+                タイトル
+              </label>
+
+              <input
+                type="text"
+                id="diary-title-input"
+                placeholder="タイトルを入力"
+              >
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="diary-content-input">
+                本文
+              </label>
+
+              <textarea
+                id="diary-content-input"
+                placeholder="日記を書いてください"
+              ></textarea>
+
+            </div>
+
+
+            <div
+              id="diary-editor-message"
+              class="message"
+            ></div>
+
+
+            <button
+              type="button"
+              id="diary-save-button"
+            >
+              日記を保存
+            </button>
+
+
+            <button
+              type="button"
+              id="diary-editor-back"
+              class="secondary-button"
+            >
+              ← 日記一覧に戻る
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
+
 </body>
 </html>

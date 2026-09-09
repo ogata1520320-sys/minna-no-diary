@@ -113,3 +113,172 @@ button:active {
     padding-top: 30px;
   }
 }
+.diary-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.diary-controls button {
+  flex: 1;
+  margin-top: 0;
+}
+
+.diary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.diary-item {
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fafafa;
+  cursor: pointer;
+}
+
+.diary-item:active {
+  transform: scale(0.99);
+}
+
+.diary-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.diary-meta {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.diary-status {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: #e5e7eb;
+  font-size: 11px;
+}
+
+.diary-detail {
+  margin-top: 16px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+#diary-detail-content {
+  margin-top: 16px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  line-height: 1.8;
+}
+
+.diary-detail-meta {
+  color: #6b7280;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.diary-detail-content {
+  white-space: pre-wrap;
+  line-height: 1.8;
+  font-size: 15px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ==============================
+   日記作成画面
+   ============================== */
+
+#diary-editor {
+  margin-top: 16px;
+}
+
+#diary-title-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#diary-content-input {
+  width: 100%;
+  min-height: 400px;
+  box-sizing: border-box;
+  resize: vertical;
+  padding: 14px;
+  font-size: 16px;
+  line-height: 1.8;
+  font-family: inherit;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+#diary-content-input:focus,
+#diary-title-input:focus {
+  outline: none;
+  border-color: #6b7280;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+#diary-detail {
+  margin-top: 0;
+}
+
+#diary-detail-content {
+  margin-top: 8px;
+}
+
+#diary-detail {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+#diary-detail-content {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+#diary-detail {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#diary-detail-content {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 日記本文の上の余白をなくす */
+#diary-detail {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+#diary-detail-content {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* 本文を入れているカードの上余白をなくす */
+#diary-detail-content {
+  position: relative;
+  top: -16px;
+}
