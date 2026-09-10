@@ -1,343 +1,70 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>みんなの日記</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>みんなの日記</title>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-  <div id="app">
-
-    <header class="app-header">
-      <h1>みんなの日記</h1>
-    </header>
-
-    <main class="container">
-
-      <!-- ログイン画面 -->
-      <section id="login-screen" class="card">
-
-        <h2>ログイン</h2>
-
-        <form id="login-form">
-
-          <label for="user-id">
-            ユーザーID
-          </label>
-
-          <input
-            type="text"
-            id="user-id"
-            autocomplete="username"
-            required
-          >
-
-          <label for="password">
-            パスワード
-          </label>
-
-          <input
-            type="password"
-            id="password"
-            autocomplete="current-password"
-            required
-          >
-
-          <button type="submit">
-            ログイン
-          </button>
-
-        </form>
-
-        <p
-          id="login-message"
-          class="message"
-        ></p>
-
-      </section>
-
-
-      <!-- ログイン後 -->
-      <section
-        id="home-screen"
-        class="hidden"
-      >
-
-
-        <!-- ==========================
-             一覧画面上部
-             ========================== -->
-
-        <div
-          id="home-user-card"
-          class="card"
-        >
-
-          <h2>ホーム</h2>
-
-          <p id="welcome-message"></p>
-
-          <button
-            type="button"
-            id="logout-button"
-            class="secondary-button"
-          >
-            ログアウト
-          </button>
-
-        </div>
-
-
-        <!-- ==========================
-             日記詳細画面上部
-             タイトル・名前・日時
-             ========================== -->
-
-        <div
-          id="diary-detail-header"
-          class="card hidden"
-        >
-
-          <h2 id="diary-detail-header-title"></h2>
-
-          <div
-            id="diary-detail-header-meta"
-            class="diary-detail-meta"
-          ></div>
-
-        </div>
-
-
-        <!-- ==========================
-             日記エリア
-             ========================== -->
-
-        <div class="card diary-page-card">
-
-          <h2 id="diary-page-title">
-            日記
-          </h2>
-
-
-          <!-- 日記操作 -->
-          <div class="diary-controls">
-
-            <button
-              type="button"
-              id="all-diaries-button"
-            >
-              みんなの日記
-            </button>
-
-            <button
-              type="button"
-              id="my-diaries-button"
-              class="secondary-button"
-            >
-              自分の日記
-            </button>
-
-          </div>
-
-
-          <!-- 新しく書く -->
-          <button
-            type="button"
-            id="new-diary-button"
-          >
-            ＋ 新しく書く
-          </button>
-
-
-          <div
-            id="diary-message"
-            class="message"
-          ></div>
-
-
-          <!-- ==========================
-               日記一覧
-               ========================== -->
-
-          <div
-            id="diary-list"
-            class="diary-list"
-          ></div>
-
-
-          <!-- ==========================
-               日記本文
-               ========================== -->
-
-          <div
-            id="diary-detail"
-            class="diary-detail hidden"
-          >
-
-            <div
-              id="diary-detail-content"
-              class="diary-detail-content diary-body-card"
-            ></div>
-
-            <!-- コメント欄 -->
-<div
-  id="comments-section"
-  class="comments-section"
->
-
-  <div class="comments-heading"><h3>コメント</h3><span class="comments-count-label">みんなの声</span></div>
-
-  <!-- コメント一覧 -->
-  <div
-    id="comment-list"
-    class="comment-list"
-  ></div>
-
-  <!-- コメント入力 -->
-  <button
-    type="button"
-    id="comment-open-button"
-    class="comment-open-button"
-  >
-    コメントを書く
-  </button>
-
-  <div class="comment-form hidden">
-
-    <div class="comment-input-wrap">
-      <textarea
-        id="comment-input"
-        rows="4"
-        placeholder="コメントを書く…"
-      ></textarea>
-    </div>
-
-    <div
-      id="comment-message"
-      class="message"
-    ></div>
-
-    <div class="comment-form-actions">
-      <button
-        type="button"
-        id="comment-submit-button"
-      >
-        コメントする
-      </button>
-
-      <button
-        type="button"
-        id="comment-cancel-button"
-        class="secondary-button"
-      >
-        キャンセル
-      </button>
-    </div>
-
-  </div>
-
+<div id="app">
+<header class="app-header"><h1>みんなの日記</h1></header>
+<main class="container">
+<section id="login-screen" class="card">
+<h2>ログイン</h2>
+<form id="login-form">
+<label for="user-id">ユーザーID</label><input type="text" id="user-id" autocomplete="username" required>
+<label for="password">パスワード</label><input type="password" id="password" autocomplete="current-password" required>
+<button type="submit">ログイン</button>
+</form>
+<p id="login-message" class="message"></p>
+<div class="login-register"><span>アカウントをお持ちでない方</span><button type="button" id="register-open-button" class="secondary-button">新規登録</button></div>
+</section>
+<section id="register-modal" class="modal hidden" aria-label="新規登録">
+<div class="modal-card">
+<h2>新規登録</h2>
+<form id="register-form">
+<label for="register-user-id">ユーザーID</label><input id="register-user-id" autocomplete="username" placeholder="英数字・_・- / 3〜30文字" required>
+<label for="register-name">表示名</label><input id="register-name" maxlength="40" required>
+<label for="register-password">パスワード</label><input type="password" id="register-password" autocomplete="new-password" required>
+<label for="register-password-confirm">パスワード（確認）</label><input type="password" id="register-password-confirm" autocomplete="new-password" required>
+<p class="form-note">パスワードは6〜100文字です。</p>
+<p id="register-message" class="message"></p>
+<div class="form-actions"><button type="submit">アカウントを作成</button><button type="button" id="register-cancel-button" class="secondary-button">キャンセル</button></div>
+</form>
 </div>
-
-            <button
-              type="button"
-              id="diary-edit-button"
-              class="secondary-button diary-edit-button hidden"
-            >
-              編集する
-            </button>
-
-            <button
-              type="button"
-              id="diary-detail-back"
-              class="secondary-button"
-            >
-              ← 日記一覧に戻る
-            </button>
-
-          </div>
-
-
-          <!-- ==========================
-               新規日記作成
-               ========================== -->
-
-          <div
-            id="diary-editor"
-            class="diary-detail hidden"
-          >
-
-            <h2 id="diary-editor-title">
-              新しい日記
-            </h2>
-
-
-            <div class="form-group">
-
-              <label for="diary-title-input">
-                タイトル
-              </label>
-
-              <input
-                type="text"
-                id="diary-title-input"
-                placeholder="タイトルを入力"
-              >
-
-            </div>
-
-
-            <div class="form-group">
-
-              <label for="diary-content-input">
-                本文
-              </label>
-
-              <textarea
-                id="diary-content-input"
-                placeholder="日記を書いてください"
-              ></textarea>
-
-            </div>
-
-
-            <div
-              id="diary-editor-message"
-              class="message"
-            ></div>
-
-
-            <button
-              type="button"
-              id="diary-save-button"
-            >
-              日記を保存
-            </button>
-
-
-            <button
-              type="button"
-              id="diary-editor-back"
-              class="secondary-button"
-            >
-              ← 日記一覧に戻る
-            </button>
-
-          </div>
-
-        </div>
-
-      </section>
-
-    </main>
-
-  </div>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js"></script>
-
+</section>
+<section id="home-screen" class="hidden">
+<div id="home-user-card" class="card"><h2>ホーム</h2><p id="welcome-message"></p><button type="button" id="logout-button" class="secondary-button">ログアウト</button></div>
+<div id="diary-detail-header" class="card hidden"><h2 id="diary-detail-header-title"></h2><div id="diary-detail-header-meta" class="diary-detail-meta"></div></div>
+<div class="card diary-page-card">
+<h2 id="diary-page-title">日記</h2>
+<div class="diary-controls"><button type="button" id="all-diaries-button">みんなの日記</button><button type="button" id="my-diaries-button" class="secondary-button">自分の日記</button><button type="button" id="drafts-button" class="secondary-button">下書き</button></div>
+<button type="button" id="new-diary-button">＋ 新しく書く</button>
+<div id="diary-message" class="message"></div>
+<div id="diary-list" class="diary-list"></div>
+<div id="diary-detail" class="diary-detail hidden">
+<div id="diary-detail-content" class="diary-detail-content diary-body-card"></div>
+<div id="comments-section" class="comments-section hidden">
+<div class="comments-heading"><h3>コメント</h3><span class="comments-count-label">みんなの声</span></div>
+<div id="comment-list" class="comment-list"></div>
+<button type="button" id="comment-open-button" class="comment-open-button">コメントを書く</button>
+<div class="comment-form hidden"><div class="comment-input-wrap"><textarea id="comment-input" rows="4" maxlength="1000" placeholder="コメントを書く…"></textarea></div><div id="comment-message" class="message"></div><div class="comment-form-actions"><button type="button" id="comment-submit-button">コメントする</button><button type="button" id="comment-cancel-button" class="secondary-button">キャンセル</button></div></div>
+</div>
+<div class="detail-actions"><button type="button" id="diary-edit-button" class="secondary-button hidden">編集する</button><button type="button" id="diary-delete-button" class="secondary-button danger-button hidden">削除する</button><button type="button" id="diary-detail-back" class="secondary-button">← 日記一覧に戻る</button></div>
+</div>
+<div id="diary-editor" class="diary-editor hidden">
+<h2 id="diary-editor-title">新しい日記</h2>
+<div class="form-group"><label for="diary-title-input">タイトル</label><input type="text" id="diary-title-input" maxlength="100" placeholder="タイトルを入力"></div>
+<div class="form-group"><label for="diary-content-input">本文</label><textarea id="diary-content-input" maxlength="30000" placeholder="日記を書いてください"></textarea><div class="form-note">30,000文字まで入力できます。</div></div>
+<p id="diary-editor-message" class="message"></p>
+<div class="editor-actions"><button type="button" id="diary-save-draft-button" class="secondary-button">下書き保存</button><button type="button" id="diary-publish-button">公開する</button></div>
+<button type="button" id="diary-editor-back" class="secondary-button">← 日記一覧に戻る</button>
+</div>
+</div>
+</section>
+</main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js"></script>
 </body>
 </html>
