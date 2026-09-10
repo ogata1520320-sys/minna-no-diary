@@ -83,6 +83,7 @@ function contentJsonToText(value) {
 function showLogin() {
   loginScreen.classList.remove('hidden');
   homeScreen.classList.add('hidden');
+  logoutButton?.classList.add('hidden');
   if (registerModal) registerModal.classList.add('hidden');
 }
 
@@ -171,12 +172,14 @@ async function showHome(authUser) {
   if (!user.active) { await supabaseClient.auth.signOut(); showLogin(); loginMessage.textContent = 'このアカウントは現在無効になっています。'; return; }
   currentUser = user;
   loginScreen.classList.add('hidden'); homeScreen.classList.remove('hidden');
+  logoutButton?.classList.remove('hidden');
   welcomeMessage.textContent = `${user.name}さん、ようこそ！`;
   showDiaryHome();
   await loadDiaries('all');
 }
 
 logoutButton.addEventListener('click', async () => {
+  if (!confirm('ログアウトしますか？')) return;
   await supabaseClient.auth.signOut();
   currentUser = null; currentDiaryId = null; currentEditingDiaryId = null;
   showLogin();
@@ -185,24 +188,39 @@ logoutButton.addEventListener('click', async () => {
 function showDiaryHome() {
   homeUserCard.classList.remove('hidden'); diaryPageTitle.classList.remove('hidden'); diaryList.classList.remove('hidden');
   diaryDetailHeader.classList.add('hidden'); diaryDetail.classList.add('hidden'); diaryEditor.classList.add('hidden');
-  allDiariesButton.classList.remove('hidden'); myDiariesButton.classList.remove('hidden'); draftsButton?.classList.remove('hidden'); newDiaryButton.classList.remove('hidden');
+  allDiariesButton.classList.remove('hidden'); myDiariesButton.classList.remove('hidden'); draftsButton?.classList.remove('hidden');
+  setActiveDiaryTab(currentDiaryFilter);
   diaryEditButton?.classList.add('hidden'); diaryDeleteButton?.classList.add('hidden');
   commentsSection?.classList.add('hidden'); closeCommentForm();
 }
 
 function hideDiaryControls() {
-  allDiariesButton.classList.add('hidden'); myDiariesButton.classList.add('hidden'); draftsButton?.classList.add('hidden'); newDiaryButton.classList.add('hidden');
+  allDiariesButton.classList.add('hidden'); myDiariesButton.classList.add('hidden'); draftsButton?.classList.add('hidden');
+}
+
+function setActiveDiaryTab(filter) {
+  const buttons = { all: allDiariesButton, mine: myDiariesButton, drafts: draftsButton };
+  Object.entries(buttons).forEach(([key, button]) => {
+    if (!button) return;
+    const active = key === filter;
+    button.classList.toggle('active-tab', active);
+    button.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
 }
 
 async function loadDiaries(filter='all') {
   currentDiaryFilter = filter;
-  diaryMessage.textContent = '日記を読み込んでいます…'; diaryList.innerHTML = '';
+  setActiveDiaryTab(filter);
+  diaryMessage.textContent = '';
+  diaryList.setAttribute('aria-busy', 'true');
   let query = supabaseClient.from('diaries').select('diary_id,user_id,name,title,status,content_json,created_at,updated_at,published_at').order('updated_at',{ascending:false}).limit(100);
   if (filter === 'mine' || filter === 'drafts') query = query.eq('user_id', currentUser.user_id);
   const { data, error } = await query;
-  if (error) { console.error(error); diaryMessage.textContent = '日記の取得に失敗しました。'; return; }
+  if (error) { console.error(error); diaryMessage.textContent = '日記の取得に失敗しました。'; diaryList.removeAttribute('aria-busy'); return; }
   const visible = (data || []).filter(d => d.status === 'published' || d.user_id === currentUser.user_id).filter(d => filter !== 'drafts' || d.status === 'draft');
+  diaryList.removeAttribute('aria-busy');
   diaryMessage.textContent = '';
+  diaryList.innerHTML = '';
   if (!visible.length) { diaryList.innerHTML = '<p class="message">日記がありません。</p>'; return; }
   visible.forEach(diary => {
     const item = document.createElement('article'); item.className='diary-item'; item.tabIndex=0;
@@ -218,11 +236,10 @@ draftsButton?.addEventListener('click', async()=>{showDiaryHome(); await loadDia
 
 async function openDiary(diaryId) {
   currentDiaryId = diaryId; closeCommentForm(); replyingToCommentId=null;
-  homeUserCard.classList.add('hidden'); diaryPageTitle.classList.add('hidden'); diaryList.classList.add('hidden'); hideDiaryControls(); diaryDetailHeader.classList.remove('hidden'); diaryDetail.classList.remove('hidden'); diaryEditor.classList.add('hidden');
-  diaryDetailHeaderTitle.textContent='読み込んでいます…'; diaryDetailHeaderMeta.textContent=''; diaryDetailContent.textContent='';
   const { data, error } = await supabaseClient.from('diaries').select('diary_id,user_id,name,title,status,content_json,created_at,updated_at,published_at').eq('diary_id',diaryId).maybeSingle();
-  if (error || !data) { console.error(error); diaryDetailHeaderTitle.textContent='日記を取得できませんでした。'; return; }
-  if (data.status !== 'published' && data.user_id !== currentUser.user_id) { diaryDetailHeaderTitle.textContent='日記が見つかりません。'; return; }
+  if (error || !data) { console.error(error); alert('日記を取得できませんでした。'); return; }
+  if (data.status !== 'published' && data.user_id !== currentUser.user_id) { alert('日記が見つかりません。'); return; }
+  homeUserCard.classList.add('hidden'); diaryPageTitle.classList.add('hidden'); diaryList.classList.add('hidden'); hideDiaryControls(); diaryDetailHeader.classList.remove('hidden'); diaryDetail.classList.remove('hidden'); diaryEditor.classList.add('hidden');
   diaryDetailHeaderTitle.textContent=data.title || '無題';
   diaryDetailHeaderMeta.innerHTML=`<div class="detail-meta-item"><span class="detail-meta-label">名前</span><span class="detail-meta-value">${escapeHtml(data.name || data.user_id)}</span></div><div class="detail-meta-item"><span class="detail-meta-label">日時</span><span class="detail-meta-value">${formatDate(data.updated_at)}</span></div><div class="detail-meta-item"><span class="detail-meta-label">状態</span><span class="detail-meta-value">${data.status==='draft'?'下書き':'公開'}</span></div>`;
   diaryDetailContent.textContent=contentJsonToText(data.content_json);
