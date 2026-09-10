@@ -197,7 +197,15 @@
   ></div>
 
   <!-- コメント入力 -->
-  <div class="comment-form">
+  <button
+    type="button"
+    id="comment-open-button"
+    class="comment-open-button"
+  >
+    コメントを書く
+  </button>
+
+  <div class="comment-form hidden">
 
     <div class="comment-input-wrap">
       <textarea
@@ -212,12 +220,22 @@
       class="message"
     ></div>
 
-    <button
-      type="button"
-      id="comment-submit-button"
-    >
-      コメントする
-    </button>
+    <div class="comment-form-actions">
+      <button
+        type="button"
+        id="comment-submit-button"
+      >
+        コメントする
+      </button>
+
+      <button
+        type="button"
+        id="comment-cancel-button"
+        class="secondary-button"
+      >
+        キャンセル
+      </button>
+    </div>
 
   </div>
 

@@ -292,7 +292,7 @@ button:active {
 .detail-meta-label{color:#6b7280;font-size:12px;min-width:36px}
 .detail-meta-value{font-size:14px;font-weight:600}
 .diary-body-card{position:static!important;margin:0 0 16px!important;padding:20px!important;border:1px solid #e5e7eb!important;border-radius:14px;background:#fff!important;box-shadow:0 2px 8px rgba(0,0,0,.05);min-height:80px;white-space:pre-wrap}
-.comments-section{margin:0 0 16px;padding:18px;border:1px solid #e5e7eb;border-radius:14px;background:#fafafa}
+.comments-section{margin:28px 0 16px;padding:0;border:0;background:transparent}
 .comments-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
 .comments-heading h3{margin:0;font-size:18px}
 .comments-count-label{color:#6b7280;font-size:12px}
@@ -317,4 +317,11 @@ button:active {
 #comment-input::placeholder{color:#a1a7b0}
 #comment-submit-button{margin-top:12px}
 .diary-edit-button{margin-top:12px}
-@media(max-width:420px){.comments-section{padding:14px}.comment-item{padding:12px}.comment-reply-thread{margin-left:12px;padding-left:8px}.comment-topline{align-items:flex-start;flex-direction:column;gap:3px}}
+@media(max-width:420px){.comments-section{margin-top:24px}.comment-item{padding:12px}.comment-reply-thread{margin-left:12px;padding-left:8px}.comment-topline{align-items:flex-start;flex-direction:column;gap:3px}}
+
+.comment-open-button{width:100%;height:46px;margin-top:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;color:#374151;font-size:14px;font-weight:600}
+.comment-open-button:hover{background:#f8f9fa}
+.comment-form-actions{display:flex;gap:10px}
+.comment-form-actions button{flex:1}
+#comment-cancel-button{margin-top:12px}
+@media(max-width:420px){.comment-form-actions{gap:8px}}

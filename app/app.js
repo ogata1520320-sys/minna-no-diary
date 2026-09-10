@@ -150,6 +150,16 @@ const commentSubmitButton =
     'comment-submit-button'
   );
 
+const commentOpenButton =
+  document.getElementById(
+    'comment-open-button'
+  );
+
+const commentCancelButton =
+  document.getElementById(
+    'comment-cancel-button'
+  );
+
 
 // ==================================================
 // 現在の状態
@@ -812,6 +822,8 @@ async function openDiary(
 
   }
 
+  closeCommentForm();
+
 
   diaryDetailHeaderTitle.textContent =
     '読み込んでいます…';
@@ -1382,8 +1394,9 @@ function renderComment(
   replyButton.className = 'comment-action-button';
   replyButton.addEventListener('click', () => {
     replyingToCommentId = comment.comment_id;
-    commentInput.focus();
+    openCommentForm();
     commentMessage.textContent = `${comment.name || comment.user_id}さんへの返信`;
+    commentInput.focus();
     commentInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
   actions.appendChild(replyButton);
@@ -1429,6 +1442,20 @@ function renderComment(
 // コメント投稿
 // ==================================================
 
+commentOpenButton.addEventListener(
+  'click',
+  () => {
+    openCommentForm();
+  }
+);
+
+commentCancelButton.addEventListener(
+  'click',
+  () => {
+    closeCommentForm();
+  }
+);
+
 commentSubmitButton.addEventListener(
   'click',
   async () => {
@@ -1438,6 +1465,37 @@ commentSubmitButton.addEventListener(
   }
 );
 
+
+// ==================================================
+// コメント入力欄の開閉
+// ==================================================
+
+function openCommentForm() {
+  const form = document.querySelector('.comment-form');
+
+  if (!form) {
+    return;
+  }
+
+  form.classList.remove('hidden');
+  commentOpenButton.classList.add('hidden');
+  commentMessage.textContent = '';
+  commentInput.focus();
+}
+
+function closeCommentForm() {
+  const form = document.querySelector('.comment-form');
+
+  if (!form) {
+    return;
+  }
+
+  form.classList.add('hidden');
+  commentOpenButton.classList.remove('hidden');
+  commentInput.value = '';
+  commentMessage.textContent = '';
+  replyingToCommentId = null;
+}
 
 // ==================================================
 // コメント投稿処理
@@ -1557,6 +1615,8 @@ async function submitComment() {
     await loadComments(
       currentDiaryId
     );
+
+    closeCommentForm();
 
   } finally {
 
