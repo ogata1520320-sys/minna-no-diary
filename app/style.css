@@ -291,7 +291,7 @@ button:active {
 .detail-meta-item{display:flex;gap:8px;align-items:baseline}
 .detail-meta-label{color:#6b7280;font-size:12px;min-width:36px}
 .detail-meta-value{font-size:14px;font-weight:600}
-.diary-body-card{position:static!important;margin:0 0 16px!important;padding:20px!important;border:1px solid #e5e7eb!important;border-radius:14px;background:#fff!important;box-shadow:0 2px 8px rgba(0,0,0,.05);min-height:80px;white-space:pre-wrap}
+
 .comments-section{margin:28px 0 16px;padding:0;border:0;background:transparent}
 .comments-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
 .comments-heading h3{margin:0;font-size:18px}
@@ -325,3 +325,37 @@ button:active {
 .comment-form-actions button{flex:1}
 #comment-cancel-button{margin-top:12px}
 @media(max-width:420px){.comment-form-actions{gap:8px}}
+
+/* Diary detail: separate header information from the body */
+.diary-page-card{
+  padding:22px;
+  margin-bottom:18px;
+}
+
+.diary-page-card > .diary-body-card{
+  margin-top:18px;
+}
+
+/* Keep title / name / date in the header card, and the article body in its own card. */
+.diary-body-card{
+  margin-top:18px;
+  padding:18px;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  background:#fff;
+}
+
+.diary-body-card .diary-content{
+  margin-top:0;
+}
+
+@media(max-width:420px){
+  .diary-page-card{
+    padding:16px;
+    margin-bottom:16px;
+  }
+  .diary-body-card{
+    margin-top:16px;
+    padding:14px;
+  }
+}
