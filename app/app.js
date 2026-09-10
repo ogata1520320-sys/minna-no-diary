@@ -177,7 +177,7 @@ githubLoginButton.addEventListener(
           provider: 'github',
           options: {
             redirectTo:
-              window.location.origin
+  window.location.origin + '/minna-no-diary/app/'
           }
         });
 
