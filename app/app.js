@@ -17,7 +17,7 @@ const supabaseClient =
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true
+        detectSessionInUrl: false
       }
     }
   );
@@ -44,9 +44,6 @@ const welcomeMessage =
 
 const logoutButton =
   document.getElementById('logout-button');
-
-const githubLoginButton =
-  document.getElementById('github-login-button');
 
 const homeUserCard =
   document.getElementById('home-user-card');
@@ -163,37 +160,104 @@ let replyingToCommentId = null;
 
 
 // ==================================================
-// GitHubログイン
+// ID・パスワードログイン
 // ==================================================
 
-githubLoginButton.addEventListener(
-  'click',
-  async () => {
+loginForm.addEventListener(
+  'submit',
+  async (event) => {
+
+    event.preventDefault();
+
+    const userId =
+      document.getElementById('user-id')
+        .value
+        .trim();
+
+    const password =
+      document.getElementById('password')
+        .value;
+
+    if (!userId || !password) {
+      loginMessage.textContent =
+        'IDとパスワードを入力してください。';
+      return;
+    }
 
     loginMessage.textContent =
-      'GitHubへ移動しています…';
+      'ログインしています…';
 
-    const {
-      error
-    } =
-      await supabaseClient.auth
-        .signInWithOAuth({
-          provider: 'github',
-          options: {
-            redirectTo:
-  window.location.origin + '/minna-no-diary/app/'
+    const submitButton =
+      loginForm.querySelector('button[type="submit"]');
+
+    if (submitButton) {
+      submitButton.disabled = true;
+    }
+
+    try {
+
+      const response =
+        await fetch(
+          `${SUPABASE_URL}/functions/v1/legacy-login`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              userId,
+              password
+            })
           }
+        );
+
+      const result =
+        await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(
+          result.error ||
+          'IDまたはパスワードが違います。'
+        );
+      }
+
+      if (!result.session) {
+        throw new Error(
+          'ログインセッションを取得できませんでした。'
+        );
+      }
+
+      const { error: sessionError } =
+        await supabaseClient.auth.setSession({
+          access_token: result.session.access_token,
+          refresh_token: result.session.refresh_token
         });
 
-    if (error) {
+      if (sessionError) {
+        throw sessionError;
+      }
+
+      loginMessage.textContent = '';
+
+      document.getElementById('password').value = '';
+
+    } catch (error) {
 
       console.error(
-        'GitHubログインエラー:',
+        'ID・パスワードログインエラー:',
         error
       );
 
       loginMessage.textContent =
-        'GitHubログインに失敗しました。';
+        error.message ||
+        'ログインに失敗しました。';
+
+    } finally {
+
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+
     }
 
   }
@@ -229,6 +293,16 @@ async function checkLogin() {
 
 
   if (session) {
+
+    // 以前のGitHub OAuthセッションがブラウザに残っている場合は破棄する
+    const provider =
+      session.user?.app_metadata?.provider;
+
+    if (provider === 'github') {
+      await supabaseClient.auth.signOut();
+      showLogin();
+      return;
+    }
 
     await showHome(
       session.user
@@ -288,7 +362,7 @@ async function showHome(
   if (!user) {
 
     loginMessage.textContent =
-      'このGitHubアカウントは登録されていません。';
+      'このアカウントは登録されていません。';
 
     return;
   }
@@ -1535,45 +1609,133 @@ async function submitComment() {
 // ==================================================
 // コメント通知
 // ==================================================
+
 async function createCommentNotification(
   comment
 ) {
 
   try {
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.functions.invoke(
-        'send-push',
-        {
-          body: {
-            comment_id:
-              comment.comment_id
-          }
-        }
-      );
+    let targetUserId =
+      null;
 
-    if (error) {
+    let message =
+      '';
 
-      console.error(
-        '通知送信エラー:',
-        error
-      );
 
-      return;
+    // 返信の場合
+    if (
+      comment.parent_comment_id
+    ) {
+
+      const {
+        data: parentComment
+      } =
+        await supabaseClient
+          .from('comments')
+          .select(
+            'user_id'
+          )
+          .eq(
+            'comment_id',
+            comment.parent_comment_id
+          )
+          .maybeSingle();
+
+
+      if (
+        parentComment &&
+        parentComment.user_id !==
+          currentUser.user_id
+      ) {
+
+        targetUserId =
+          parentComment.user_id;
+
+        message =
+          `${currentUser.name}さんがあなたのコメントに返信しました。`;
+
+      }
+
+    } else {
+
+      // 通常コメントの場合は日記投稿者へ
+      const {
+        data: diary
+      } =
+        await supabaseClient
+          .from('diaries')
+          .select(
+            'user_id, title'
+          )
+          .eq(
+            'diary_id',
+            comment.diary_id
+          )
+          .maybeSingle();
+
+
+      if (
+        diary &&
+        diary.user_id !==
+          currentUser.user_id
+      ) {
+
+        targetUserId =
+          diary.user_id;
+
+        message =
+          `${currentUser.name}さんが「${diary.title}」にコメントしました。`;
+
+      }
+
     }
 
-    console.log(
-      'コメント通知送信結果:',
-      data
-    );
+
+    if (!targetUserId) {
+
+      return;
+
+    }
+
+
+    await supabaseClient
+      .from('notifications')
+      .insert({
+        notification_id:
+          generateId(),
+
+        user_id:
+          targetUserId,
+
+        type:
+          comment.parent_comment_id
+            ? 'comment_reply'
+            : 'comment',
+
+        diary_id:
+          comment.diary_id,
+
+        comment_id:
+          comment.comment_id,
+
+        from_user_id:
+          currentUser.user_id,
+
+        message:
+          message,
+
+        created_at:
+          new Date().toISOString(),
+
+        read:
+          false
+      });
 
   } catch (error) {
 
     console.error(
-      '通知送信エラー:',
+      '通知作成エラー:',
       error
     );
 
@@ -2113,56 +2275,6 @@ function urlBase64ToUint8Array(
 
     outputArray[i] =
       rawData.charCodeAt(i);
-  }
-
-  return outputArray;
-}
-
-
-// ==================================================
-// Base64 → Uint8Array
-// ==================================================
-
-function urlBase64ToUint8Array(
-  base64String
-) {
-
-  const padding =
-    '='.repeat(
-      (4 - base64String.length % 4) % 4
-    );
-
-  const base64 =
-    (
-      base64String +
-      padding
-    )
-      .replace(
-        /-/g,
-        '+'
-      )
-      .replace(
-        /_/g,
-        '/'
-      );
-
-  const rawData =
-    window.atob(base64);
-
-  const outputArray =
-    new Uint8Array(
-      rawData.length
-    );
-
-  for (
-    let i = 0;
-    i < rawData.length;
-    ++i
-  ) {
-
-    outputArray[i] =
-      rawData.charCodeAt(i);
-
   }
 
   return outputArray;
