@@ -1535,133 +1535,45 @@ async function submitComment() {
 // ==================================================
 // コメント通知
 // ==================================================
-
 async function createCommentNotification(
   comment
 ) {
 
   try {
 
-    let targetUserId =
-      null;
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.functions.invoke(
+        'send-push',
+        {
+          body: {
+            comment_id:
+              comment.comment_id
+          }
+        }
+      );
 
-    let message =
-      '';
+    if (error) {
 
-
-    // 返信の場合
-    if (
-      comment.parent_comment_id
-    ) {
-
-      const {
-        data: parentComment
-      } =
-        await supabaseClient
-          .from('comments')
-          .select(
-            'user_id'
-          )
-          .eq(
-            'comment_id',
-            comment.parent_comment_id
-          )
-          .maybeSingle();
-
-
-      if (
-        parentComment &&
-        parentComment.user_id !==
-          currentUser.user_id
-      ) {
-
-        targetUserId =
-          parentComment.user_id;
-
-        message =
-          `${currentUser.name}さんがあなたのコメントに返信しました。`;
-
-      }
-
-    } else {
-
-      // 通常コメントの場合は日記投稿者へ
-      const {
-        data: diary
-      } =
-        await supabaseClient
-          .from('diaries')
-          .select(
-            'user_id, title'
-          )
-          .eq(
-            'diary_id',
-            comment.diary_id
-          )
-          .maybeSingle();
-
-
-      if (
-        diary &&
-        diary.user_id !==
-          currentUser.user_id
-      ) {
-
-        targetUserId =
-          diary.user_id;
-
-        message =
-          `${currentUser.name}さんが「${diary.title}」にコメントしました。`;
-
-      }
-
-    }
-
-
-    if (!targetUserId) {
+      console.error(
+        '通知送信エラー:',
+        error
+      );
 
       return;
-
     }
 
-
-    await supabaseClient
-      .from('notifications')
-      .insert({
-        notification_id:
-          generateId(),
-
-        user_id:
-          targetUserId,
-
-        type:
-          comment.parent_comment_id
-            ? 'comment_reply'
-            : 'comment',
-
-        diary_id:
-          comment.diary_id,
-
-        comment_id:
-          comment.comment_id,
-
-        from_user_id:
-          currentUser.user_id,
-
-        message:
-          message,
-
-        created_at:
-          new Date().toISOString(),
-
-        read:
-          false
-      });
+    console.log(
+      'コメント通知送信結果:',
+      data
+    );
 
   } catch (error) {
 
     console.error(
-      '通知作成エラー:',
+      '通知送信エラー:',
       error
     );
 
