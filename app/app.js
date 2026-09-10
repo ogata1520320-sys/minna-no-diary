@@ -25,6 +25,9 @@ const myDiariesButton = $('my-diaries-button');
 const draftsButton = $('drafts-button');
 const newDiaryButton = $('new-diary-button');
 const homeUserCard = $('home-user-card');
+const notificationSection = $('notification-section');
+const notificationList = $('notification-list');
+const notificationCountLabel = $('notification-count-label');
 const diaryDetailHeader = $('diary-detail-header');
 const diaryDetailHeaderTitle = $('diary-detail-header-title');
 const diaryDetailHeaderMeta = $('diary-detail-header-meta');
@@ -175,6 +178,7 @@ async function showHome(authUser) {
   logoutButton?.classList.remove('hidden');
   welcomeMessage.textContent = `${user.name}さん、ようこそ！`;
   showDiaryHome();
+  await loadNotifications();
   await loadDiaries('all');
 }
 
@@ -185,6 +189,81 @@ logoutButton.addEventListener('click', async () => {
   showLogin();
 });
 
+async function loadNotifications() {
+  if (!notificationList || !currentUser) return;
+  notificationList.innerHTML = '<p class="message">通知を読み込んでいます…</p>';
+  const { data, error } = await supabaseClient
+    .from('notifications')
+    .select('notification_id,type,diary_id,comment_id,from_user_id,message,created_at')
+    .eq('user_id', currentUser.user_id)
+    .order('created_at', { ascending: false })
+    .limit(5);
+  if (error) {
+    console.error(error);
+    notificationList.innerHTML = '<p class="message">通知を取得できませんでした。</p>';
+    if (notificationCountLabel) notificationCountLabel.textContent = '';
+    return;
+  }
+  const notifications = data || [];
+  if (notificationCountLabel) notificationCountLabel.textContent = notifications.length ? `最新${notifications.length}件` : '';
+  if (!notifications.length) {
+    notificationList.innerHTML = '<p class="message">新しい通知はありません。</p>';
+    return;
+  }
+  notificationList.innerHTML = '';
+  notifications.forEach(n => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'notification-item';
+    item.innerHTML = `<span class="notification-icon">🔔</span><span class="notification-main"><span class="notification-message">${escapeHtml(n.message || 'コメント・返信がありました。')}</span><span class="notification-time">${formatDate(n.created_at)}</span></span>`;
+    if (n.diary_id) item.addEventListener('click', () => openDiary(n.diary_id));
+    notificationList.appendChild(item);
+  });
+}
+
+async function createNotificationForComment(comment) {
+  try {
+    const { data: diary, error: diaryError } = await supabaseClient
+      .from('diaries')
+      .select('diary_id,user_id,title')
+      .eq('diary_id', comment.diary_id)
+      .maybeSingle();
+    if (diaryError || !diary) return;
+
+    let targetUserId = diary.user_id;
+    let message = `${currentUser.name || currentUser.user_id}さんが「${diary.title || '無題'}」にコメントしました。`;
+
+    if (comment.parent_comment_id) {
+      const { data: parent, error: parentError } = await supabaseClient
+        .from('comments')
+        .select('user_id')
+        .eq('comment_id', comment.parent_comment_id)
+        .maybeSingle();
+      if (!parentError && parent?.user_id) {
+        targetUserId = parent.user_id;
+        message = `${currentUser.name || currentUser.user_id}さんがあなたのコメントに返信しました。`;
+      }
+    }
+
+    if (!targetUserId || targetUserId === currentUser.user_id) return;
+
+    const { error } = await supabaseClient.from('notifications').insert({
+      notification_id: generateId(),
+      user_id: targetUserId,
+      type: comment.parent_comment_id ? 'reply' : 'comment',
+      diary_id: comment.diary_id,
+      comment_id: comment.comment_id,
+      from_user_id: currentUser.user_id,
+      message,
+      created_at: new Date().toISOString(),
+      read: false
+    });
+    if (error) console.error('通知作成エラー:', error);
+  } catch (e) {
+    console.error('通知作成エラー:', e);
+  }
+}
+
 function showDiaryHome() {
   homeUserCard.classList.remove('hidden'); diaryPageTitle.classList.remove('hidden'); diaryList.classList.remove('hidden');
   diaryDetailHeader.classList.add('hidden'); diaryDetail.classList.add('hidden'); diaryEditor.classList.add('hidden');
@@ -192,6 +271,7 @@ function showDiaryHome() {
   setActiveDiaryTab(currentDiaryFilter);
   diaryEditButton?.classList.add('hidden'); diaryDeleteButton?.classList.add('hidden');
   commentsSection?.classList.add('hidden'); closeCommentForm();
+  notificationSection?.classList.remove('hidden');
 }
 
 function hideDiaryControls() {
@@ -244,7 +324,7 @@ async function openDiary(diaryId) {
   const { data, error } = await supabaseClient.from('diaries').select('diary_id,user_id,name,title,status,content_json,created_at,updated_at,published_at').eq('diary_id',diaryId).maybeSingle();
   if (error || !data) { console.error(error); alert('日記を取得できませんでした。'); return; }
   if (data.status !== 'published' && data.user_id !== currentUser.user_id) { alert('日記が見つかりません。'); return; }
-  homeUserCard.classList.add('hidden'); diaryPageTitle.classList.add('hidden'); diaryList.classList.add('hidden'); hideDiaryControls(); diaryDetailHeader.classList.remove('hidden'); diaryDetail.classList.remove('hidden'); diaryEditor.classList.add('hidden');
+  homeUserCard.classList.add('hidden'); notificationSection?.classList.add('hidden'); diaryPageTitle.classList.add('hidden'); diaryList.classList.add('hidden'); hideDiaryControls(); diaryDetailHeader.classList.remove('hidden'); diaryDetail.classList.remove('hidden'); diaryEditor.classList.add('hidden');
   diaryDetailHeaderTitle.textContent=data.title || '無題';
   diaryDetailHeaderMeta.innerHTML=`<div class="detail-meta-item"><span class="detail-meta-label">名前</span><span class="detail-meta-value">${escapeHtml(data.name || data.user_id)}</span></div><div class="detail-meta-item"><span class="detail-meta-label">日時</span><span class="detail-meta-value">${formatDate(data.updated_at)}</span></div><div class="detail-meta-item"><span class="detail-meta-label">状態</span><span class="detail-meta-value">${data.status==='draft'?'下書き':'公開'}</span></div>`;
   diaryDetailContent.textContent=contentJsonToText(data.content_json);
@@ -256,7 +336,7 @@ async function openDiary(diaryId) {
 
 function startEditor(data=null) {
   currentEditingDiaryId = data?.diary_id || null;
-  homeUserCard.classList.add('hidden'); diaryPageTitle.classList.add('hidden'); diaryList.classList.add('hidden'); diaryDetailHeader.classList.add('hidden'); diaryDetail.classList.add('hidden'); hideDiaryControls(); commentsSection?.classList.add('hidden'); closeCommentForm();
+  homeUserCard.classList.add('hidden'); notificationSection?.classList.add('hidden'); diaryPageTitle.classList.add('hidden'); diaryList.classList.add('hidden'); diaryDetailHeader.classList.add('hidden'); diaryDetail.classList.add('hidden'); hideDiaryControls(); commentsSection?.classList.add('hidden'); closeCommentForm();
   diaryEditor.classList.remove('hidden'); diaryEditorTitle.textContent=data?'日記を編集':'新しい日記'; diaryTitleInput.value=data?.title||''; diaryContentInput.value=data?contentJsonToText(data.content_json):''; diaryEditorMessage.textContent='';
 }
 
@@ -363,8 +443,9 @@ async function submitComment() {
     const commentId=generateId();
     const {data:inserted,error}=await supabaseClient.from('comments').insert({comment_id:commentId,diary_id:currentDiaryId,user_id:currentUser.user_id,name:currentUser.name,body,parent_comment_id:replyingToCommentId||null,deleted:false}).select().single();
     if(error)throw error;
-    // 通知レコードはここでは作らない。通知機能は全機能完成後に実装する。
+    await createNotificationForComment(inserted);
     await loadComments(currentDiaryId); closeCommentForm();
+    await loadNotifications();
   }catch(e){console.error(e);commentMessage.textContent='コメントの投稿に失敗しました。';}
   finally{commentSubmitButton.disabled=false;}
 }
