@@ -5,6 +5,10 @@ const SUPABASE_PUBLISHABLE_KEY =
   'sb_publishable_ydrTup3LoNdul7KeXWVwwg_raIcSjFy';
 
 
+  const VAPID_PUBLIC_KEY =
+  'BH7tIw5nGKRPl-h391xF12CPQc7woidvAEWoLkx4UyjcRCVZopcuJ4hXgJ0w7TNha2AFPRlEeHRTl_yBvAOImsU';
+
+
 const supabaseClient =
   window.supabase.createClient(
     SUPABASE_URL,
@@ -1989,36 +1993,265 @@ if ('serviceWorker' in navigator) {
 }
 
 // ==================================================
-// プッシュ通知の許可
+// プッシュ通知登録
 // ==================================================
 
 async function requestNotificationPermission() {
 
   if (!('Notification' in window)) {
-    console.log('このブラウザは通知に対応していません。');
+    console.log(
+      'このブラウザは通知に対応していません。'
+    );
     return;
   }
 
   if (!('serviceWorker' in navigator)) {
-    console.log('Service Workerに対応していません。');
+    console.log(
+      'Service Workerに対応していません。'
+    );
     return;
   }
 
-  if (Notification.permission === 'granted') {
-    console.log('通知はすでに許可されています。');
+  if (!currentUser) {
+    console.log(
+      'ログインユーザーがいません。'
+    );
     return;
   }
 
+  // 通知が拒否されている場合
   if (Notification.permission === 'denied') {
-    console.log('通知が拒否されています。');
+    console.log(
+      '通知が拒否されています。'
+    );
     return;
   }
 
-  const permission =
-    await Notification.requestPermission();
+  // 通知許可を取得
+  let permission =
+    Notification.permission;
 
-  console.log(
-    '通知許可状態:',
-    permission
-  );
+  if (permission !== 'granted') {
+
+    permission =
+      await Notification.requestPermission();
+
+    console.log(
+      '通知許可状態:',
+      permission
+    );
+  }
+
+  // 許可されなかった場合
+  if (permission !== 'granted') {
+    return;
+  }
+
+  try {
+
+    // Service Workerを取得
+    const registration =
+      await navigator.serviceWorker.ready;
+
+    // 既存のPush購読を確認
+    let subscription =
+      await registration.pushManager
+        .getSubscription();
+
+    // まだ購読していなければ作成
+    if (!subscription) {
+
+      const applicationServerKey =
+        urlBase64ToUint8Array(
+          VAPID_PUBLIC_KEY
+        );
+
+      subscription =
+        await registration.pushManager
+          .subscribe({
+            userVisibleOnly: true,
+            applicationServerKey:
+              applicationServerKey
+          });
+    }
+
+    // Push購読情報をJSON化
+    const subscriptionJson =
+      subscription.toJSON();
+
+    const endpoint =
+      subscriptionJson.endpoint;
+
+    const p256dh =
+      subscriptionJson.keys &&
+      subscriptionJson.keys.p256dh;
+
+    const auth =
+      subscriptionJson.keys &&
+      subscriptionJson.keys.auth;
+
+    // 必要な情報が取得できなかった場合
+    if (
+      !endpoint ||
+      !p256dh ||
+      !auth
+    ) {
+
+      console.error(
+        'Push購読情報が取得できませんでした。',
+        subscriptionJson
+      );
+
+      return;
+    }
+
+    // Supabaseへ保存
+    const {
+      error
+    } =
+      await supabaseClient
+        .from('push_subscriptions')
+        .upsert(
+          {
+            user_id:
+              currentUser.user_id,
+
+            endpoint:
+              endpoint,
+
+            p256dh:
+              p256dh,
+
+            auth:
+              auth,
+
+            created_at:
+              new Date().toISOString()
+          },
+          {
+            onConflict:
+              'user_id,endpoint'
+          }
+        );
+
+    if (error) {
+
+      console.error(
+        'Push購読保存エラー:',
+        error
+      );
+
+      return;
+    }
+
+    console.log(
+      'Push購読登録成功'
+    );
+
+  } catch (error) {
+
+    console.error(
+      'Push通知登録エラー:',
+      error
+    );
+  }
+}
+
+
+// ==================================================
+// Base64 → Uint8Array
+// ==================================================
+
+function urlBase64ToUint8Array(
+  base64String
+) {
+
+  const padding =
+    '='.repeat(
+      (4 - base64String.length % 4) % 4
+    );
+
+  const base64 =
+    (
+      base64String +
+      padding
+    )
+      .replace(
+        /-/g,
+        '+'
+      )
+      .replace(
+        /_/g,
+        '/'
+      );
+
+  const rawData =
+    window.atob(base64);
+
+  const outputArray =
+    new Uint8Array(
+      rawData.length
+    );
+
+  for (
+    let i = 0;
+    i < rawData.length;
+    ++i
+  ) {
+
+    outputArray[i] =
+      rawData.charCodeAt(i);
+  }
+
+  return outputArray;
+}
+
+
+// ==================================================
+// Base64 → Uint8Array
+// ==================================================
+
+function urlBase64ToUint8Array(
+  base64String
+) {
+
+  const padding =
+    '='.repeat(
+      (4 - base64String.length % 4) % 4
+    );
+
+  const base64 =
+    (
+      base64String +
+      padding
+    )
+      .replace(
+        /-/g,
+        '+'
+      )
+      .replace(
+        /_/g,
+        '/'
+      );
+
+  const rawData =
+    window.atob(base64);
+
+  const outputArray =
+    new Uint8Array(
+      rawData.length
+    );
+
+  for (
+    let i = 0;
+    i < rawData.length;
+    ++i
+  ) {
+
+    outputArray[i] =
+      rawData.charCodeAt(i);
+
+  }
+
+  return outputArray;
 }
