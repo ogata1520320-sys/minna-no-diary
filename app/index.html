@@ -115,7 +115,7 @@
              日記エリア
              ========================== -->
 
-        <div class="card">
+        <div class="card diary-page-card">
 
           <h2 id="diary-page-title">
             日記
@@ -179,7 +179,7 @@
 
             <div
               id="diary-detail-content"
-              class="diary-detail-content"
+              class="diary-detail-content diary-body-card"
             ></div>
 
             <!-- コメント欄 -->
@@ -188,7 +188,7 @@
   class="comments-section"
 >
 
-  <h3>コメント</h3>
+  <div class="comments-heading"><h3>コメント</h3><span class="comments-count-label">みんなの声</span></div>
 
   <!-- コメント一覧 -->
   <div
@@ -199,11 +199,13 @@
   <!-- コメント入力 -->
   <div class="comment-form">
 
-    <textarea
-      id="comment-input"
-      rows="4"
-      placeholder="コメントを書く"
-    ></textarea>
+    <div class="comment-input-wrap">
+      <textarea
+        id="comment-input"
+        rows="4"
+        placeholder="コメントを書く…"
+      ></textarea>
+    </div>
 
     <div
       id="comment-message"
@@ -220,6 +222,14 @@
   </div>
 
 </div>
+
+            <button
+              type="button"
+              id="diary-edit-button"
+              class="secondary-button diary-edit-button hidden"
+            >
+              編集する
+            </button>
 
             <button
               type="button"
@@ -241,7 +251,7 @@
             class="diary-detail hidden"
           >
 
-            <h2>
+            <h2 id="diary-editor-title">
               新しい日記
             </h2>
 

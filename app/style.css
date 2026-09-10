@@ -282,3 +282,39 @@ button:active {
   position: relative;
   top: -16px;
 }
+
+/* 日記詳細・コメントUI */
+.diary-page-card{padding:16px}
+#diary-detail-header{padding:18px 20px}
+#diary-detail-header h2{margin-bottom:12px;line-height:1.45;word-break:break-word}
+.diary-detail-meta{display:flex;flex-direction:column;gap:8px;margin:0}
+.detail-meta-item{display:flex;gap:8px;align-items:baseline}
+.detail-meta-label{color:#6b7280;font-size:12px;min-width:36px}
+.detail-meta-value{font-size:14px;font-weight:600}
+.diary-body-card{position:static!important;margin:0 0 16px!important;padding:20px!important;border:1px solid #e5e7eb!important;border-radius:14px;background:#fff!important;box-shadow:0 2px 8px rgba(0,0,0,.05);min-height:80px;white-space:pre-wrap}
+.comments-section{margin:0 0 16px;padding:18px;border:1px solid #e5e7eb;border-radius:14px;background:#fafafa}
+.comments-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+.comments-heading h3{margin:0;font-size:18px}
+.comments-count-label{color:#6b7280;font-size:12px}
+.comment-list{display:flex;flex-direction:column;gap:12px}
+.comment-thread{width:100%}
+.comment-item{padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff}
+.comment-reply-thread{margin:8px 0 0 22px;padding-left:12px;border-left:2px solid #e5e7eb}
+.comment-topline{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.comment-author{font-size:14px;font-weight:700}
+.comment-date{flex-shrink:0;color:#9ca3af;font-size:11px}
+.comment-body{white-space:pre-wrap;word-break:break-word;line-height:1.7;font-size:14px}
+.comment-actions{display:flex;gap:8px;margin-top:10px}
+.comment-action-button{width:auto;height:32px;margin:0;padding:0 12px;border:1px solid #e5e7eb;border-radius:8px;background:#f5f6f8;color:#374151;font-size:12px;font-weight:600}
+.comment-delete-button{color:#6b7280}
+.reply-toggle{width:auto;height:auto;margin:7px 0 0 12px;padding:3px 0;border:0;background:transparent;color:#6b7280;font-size:12px;font-weight:600;text-align:left}
+.reply-toggle:hover{background:transparent;color:#222}
+.comment-replies{display:flex;flex-direction:column;gap:8px}
+.comment-form{margin-top:18px;padding-top:16px;border-top:1px solid #e5e7eb}
+.comment-input-wrap{border:1px solid #d9dde3;border-radius:12px;background:#fff;transition:border-color .15s ease,box-shadow .15s ease}
+.comment-input-wrap:focus-within{border-color:#9ca3af;box-shadow:0 0 0 3px rgba(156,163,175,.12)}
+#comment-input{display:block;width:100%;min-height:108px;padding:13px 14px;border:0;border-radius:12px;outline:none;resize:vertical;background:transparent;color:#222;font:inherit;font-size:15px;line-height:1.7}
+#comment-input::placeholder{color:#a1a7b0}
+#comment-submit-button{margin-top:12px}
+.diary-edit-button{margin-top:12px}
+@media(max-width:420px){.comments-section{padding:14px}.comment-item{padding:12px}.comment-reply-thread{margin-left:12px;padding-left:8px}.comment-topline{align-items:flex-start;flex-direction:column;gap:3px}}

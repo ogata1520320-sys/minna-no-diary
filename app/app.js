@@ -120,6 +120,9 @@ const diarySaveButton =
     'diary-save-button'
   );
 
+const diaryEditButton = document.getElementById('diary-edit-button');
+const diaryEditorTitle = document.getElementById('diary-editor-title');
+
 
 // コメント関連
 const commentsSection =
@@ -157,6 +160,7 @@ let currentDiaryId = null;
 let currentUser = null;
 
 let replyingToCommentId = null;
+let currentEditingDiaryId = null;
 
 
 // ==================================================
@@ -483,6 +487,10 @@ function showDiaryHome() {
   diaryEditor.classList.add(
     'hidden'
   );
+
+  if (diaryEditButton) {
+    diaryEditButton.classList.add('hidden');
+  }
 
   allDiariesButton.classList.remove(
     'hidden'
@@ -870,23 +878,15 @@ async function openDiary(
 
   // 名前・日時
   diaryDetailHeaderMeta.innerHTML = `
-    <div>
-      <strong>名前</strong>
-      <br>
-      ${escapeHtml(
-        data.name || data.user_id
-      )}
+    <div class="detail-meta-item">
+      <span class="detail-meta-label">名前</span>
+      <span class="detail-meta-value">${escapeHtml(data.name || data.user_id)}</span>
     </div>
-
-    <div style="margin-top: 8px;">
-      <strong>日時</strong>
-      <br>
-      ${formatDate(
-        data.updated_at
-      )}
+    <div class="detail-meta-item">
+      <span class="detail-meta-label">日時</span>
+      <span class="detail-meta-value">${formatDate(data.updated_at)}</span>
     </div>
   `;
-
 
   // 本文
   diaryDetailContent.textContent =
@@ -894,12 +894,58 @@ async function openDiary(
       data.content_json
     );
 
+  if (diaryEditButton) {
+    diaryEditButton.classList.toggle(
+      'hidden',
+      !(currentUser && data.user_id === currentUser.user_id)
+    );
+  }
+
 
   // コメント取得
   await loadComments(
     diaryId
   );
 
+}
+
+
+// ==================================================
+// 日記編集開始
+// ==================================================
+
+if (diaryEditButton) {
+  diaryEditButton.addEventListener('click', async () => {
+    if (!currentDiaryId || !currentUser) return;
+
+    const { data, error } = await supabaseClient
+      .from('diaries')
+      .select('diary_id, user_id, title, content_json')
+      .eq('diary_id', currentDiaryId)
+      .eq('user_id', currentUser.user_id)
+      .maybeSingle();
+
+    if (error || !data) {
+      console.error('日記編集取得エラー:', error);
+      alert('日記を編集できませんでした。');
+      return;
+    }
+
+    currentEditingDiaryId = data.diary_id;
+    homeUserCard.classList.add('hidden');
+    diaryPageTitle.classList.add('hidden');
+    diaryList.classList.add('hidden');
+    diaryDetailHeader.classList.add('hidden');
+    diaryDetail.classList.add('hidden');
+    diaryControlsHide();
+    if (commentsSection) commentsSection.classList.add('hidden');
+    diaryEditor.classList.remove('hidden');
+    diaryEditorTitle.textContent = '日記を編集';
+    diaryTitleInput.value = data.title || '';
+    diaryContentInput.value = contentJsonToText(data.content_json);
+    diaryEditorMessage.textContent = '';
+    diarySaveButton.textContent = '変更を保存';
+  });
 }
 
 
@@ -969,6 +1015,10 @@ newDiaryButton.addEventListener(
 
     }
 
+
+    currentEditingDiaryId = null;
+    diaryEditorTitle.textContent = '新しい日記';
+    diarySaveButton.textContent = '日記を保存';
 
     diaryTitleInput.value =
       '';
@@ -1114,10 +1164,6 @@ diarySaveButton.addEventListener(
       }
 
 
-      const diaryId =
-        generateId();
-
-
       const contentJson = [
         {
           type: 'text',
@@ -1125,41 +1171,41 @@ diarySaveButton.addEventListener(
         }
       ];
 
+      let saveError = null;
 
-      const {
-        error
-      } =
-        await supabaseClient
+      if (currentEditingDiaryId) {
+        const { error } = await supabaseClient
+          .from('diaries')
+          .update({
+            title: title,
+            content_json: contentJson,
+            updated_at: new Date().toISOString()
+          })
+          .eq('diary_id', currentEditingDiaryId)
+          .eq('user_id', appUser.user_id);
+        saveError = error;
+      } else {
+        const diaryId = generateId();
+        const { error } = await supabaseClient
           .from('diaries')
           .insert({
-            diary_id:
-              diaryId,
-
-            user_id:
-              appUser.user_id,
-
-            name:
-              appUser.name,
-
-            title:
-              title,
-
-            status:
-              'published',
-
-            content_json:
-              contentJson,
-
-            published_at:
-              new Date().toISOString()
+            diary_id: diaryId,
+            user_id: appUser.user_id,
+            name: appUser.name,
+            title: title,
+            status: 'published',
+            content_json: contentJson,
+            published_at: new Date().toISOString()
           });
+        saveError = error;
+      }
 
 
-      if (error) {
+      if (saveError) {
 
         console.error(
           '日記保存エラー:',
-          error
+          saveError
         );
 
         diaryEditorMessage.textContent =
@@ -1172,12 +1218,17 @@ diarySaveButton.addEventListener(
       diaryEditorMessage.textContent =
         '保存しました。';
 
+      const savedDiaryId = currentEditingDiaryId;
+      currentEditingDiaryId = null;
+      diaryEditorTitle.textContent = '新しい日記';
+      diarySaveButton.textContent = '日記を保存';
 
-      showDiaryHome();
-
-      await loadDiaries(
-        'all'
-      );
+      if (savedDiaryId) {
+        await openDiary(savedDiaryId);
+      } else {
+        showDiaryHome();
+        await loadDiaries('all');
+      }
 
     } finally {
 
@@ -1305,161 +1356,72 @@ function renderComment(
   parentElement,
   level
 ) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'comment-thread';
+  if (level > 0) wrapper.classList.add('comment-reply-thread');
 
-  const wrapper =
-    document.createElement(
-      'div'
-    );
+  const card = document.createElement('article');
+  card.className = 'comment-item';
 
-
-  wrapper.className =
-    'comment-item';
-
-
-  wrapper.style.marginLeft =
-    `${Math.min(level, 3) * 20}px`;
-
-
-  const body =
-    document.createElement(
-      'div'
-    );
-
-
+  const body = document.createElement('div');
   body.innerHTML = `
-    <div class="comment-author">
-      ${escapeHtml(
-        comment.name ||
-        comment.user_id
-      )}
+    <div class="comment-topline">
+      <span class="comment-author">${escapeHtml(comment.name || comment.user_id)}</span>
+      <span class="comment-date">${formatDate(comment.created_at)}</span>
     </div>
-
-    <div class="comment-body">
-      ${escapeHtml(
-        comment.body
-      )}
-    </div>
-
-    <div class="comment-date">
-      ${formatDate(
-        comment.created_at
-      )}
-    </div>
+    <div class="comment-body">${escapeHtml(comment.body)}</div>
   `;
+  card.appendChild(body);
 
+  const actions = document.createElement('div');
+  actions.className = 'comment-actions';
 
-  wrapper.appendChild(
-    body
-  );
+  const replyButton = document.createElement('button');
+  replyButton.type = 'button';
+  replyButton.textContent = '返信';
+  replyButton.className = 'comment-action-button';
+  replyButton.addEventListener('click', () => {
+    replyingToCommentId = comment.comment_id;
+    commentInput.focus();
+    commentMessage.textContent = `${comment.name || comment.user_id}さんへの返信`;
+    commentInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+  actions.appendChild(replyButton);
 
-
-  // 返信ボタン
-  const replyButton =
-    document.createElement(
-      'button'
-    );
-
-
-  replyButton.type =
-    'button';
-
-  replyButton.textContent =
-    '返信';
-
-  replyButton.className =
-    'secondary-button comment-reply-button';
-
-
-  replyButton.addEventListener(
-    'click',
-    () => {
-
-      replyingToCommentId =
-        comment.comment_id;
-
-      commentInput.focus();
-
-      commentMessage.textContent =
-        `${comment.name || comment.user_id}さんへの返信`;
-
-    }
-  );
-
-
-  wrapper.appendChild(
-    replyButton
-  );
-
-
-  // 自分のコメントなら削除
-  if (
-    currentUser &&
-    comment.user_id ===
-      currentUser.user_id
-  ) {
-
-    const deleteButton =
-      document.createElement(
-        'button'
-      );
-
-
-    deleteButton.type =
-      'button';
-
-    deleteButton.textContent =
-      '削除';
-
-    deleteButton.className =
-      'secondary-button comment-delete-button';
-
-
-    deleteButton.addEventListener(
-      'click',
-      async () => {
-
-        await deleteComment(
-          comment.comment_id
-        );
-
-      }
-    );
-
-
-    wrapper.appendChild(
-      deleteButton
-    );
-
+  if (currentUser && comment.user_id === currentUser.user_id) {
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.textContent = '削除';
+    deleteButton.className = 'comment-action-button comment-delete-button';
+    deleteButton.addEventListener('click', async () => {
+      await deleteComment(comment.comment_id);
+    });
+    actions.appendChild(deleteButton);
   }
 
+  card.appendChild(actions);
+  wrapper.appendChild(card);
+  parentElement.appendChild(wrapper);
 
-  parentElement.appendChild(
-    wrapper
-  );
+  const replies = allComments.filter(child => child.parent_comment_id === comment.comment_id);
+  if (replies.length > 0) {
+    const replyToggle = document.createElement('button');
+    replyToggle.type = 'button';
+    replyToggle.className = 'reply-toggle';
+    replyToggle.textContent = `▶ 返信 ${replies.length}件`;
 
+    const replyContainer = document.createElement('div');
+    replyContainer.className = 'comment-replies hidden';
 
-  // 子コメント＝返信
-  const replies =
-    allComments.filter(
-      child =>
-        child.parent_comment_id ===
-        comment.comment_id
-    );
+    replyToggle.addEventListener('click', () => {
+      const isHidden = replyContainer.classList.toggle('hidden');
+      replyToggle.textContent = `${isHidden ? '▶' : '▼'} 返信 ${replies.length}件`;
+    });
 
-
-  replies.forEach(
-    reply => {
-
-      renderComment(
-        reply,
-        allComments,
-        parentElement,
-        level + 1
-      );
-
-    }
-  );
-
+    wrapper.appendChild(replyToggle);
+    wrapper.appendChild(replyContainer);
+    replies.forEach(reply => renderComment(reply, allComments, replyContainer, level + 1));
+  }
 }
 
 
