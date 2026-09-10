@@ -195,7 +195,11 @@ function showDiaryHome() {
 }
 
 function hideDiaryControls() {
-  allDiariesButton.classList.add('hidden'); myDiariesButton.classList.add('hidden'); draftsButton?.classList.add('hidden');
+  document.querySelector('.diary-controls')?.classList.add('hidden');
+}
+
+function showDiaryControls() {
+  document.querySelector('.diary-controls')?.classList.remove('hidden');
 }
 
 function setActiveDiaryTab(filter) {
@@ -209,6 +213,7 @@ function setActiveDiaryTab(filter) {
 }
 
 async function loadDiaries(filter='all') {
+  showDiaryControls();
   currentDiaryFilter = filter;
   setActiveDiaryTab(filter);
   diaryMessage.textContent = '';
