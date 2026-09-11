@@ -551,6 +551,19 @@ function renderCommentTree(comment,all,parentElement,level) {
   }
   parentElement.appendChild(wrapper);
 }
+async function sendPushForComment(commentId) {
+  try {
+    const { error } = await supabaseClient.functions.invoke('send-push', {
+      body: { comment_id: commentId }
+    });
+
+    if (error) {
+      console.error('プッシュ通知送信エラー:', error);
+    }
+  } catch (e) {
+    console.error('プッシュ通知送信エラー:', e);
+  }
+}
 
 async function submitComment() {
   if(!currentDiaryId||!currentUser)return;
@@ -563,6 +576,7 @@ async function submitComment() {
     const {data:inserted,error}=await supabaseClient.from('comments').insert({comment_id:commentId,diary_id:currentDiaryId,user_id:currentUser.user_id,name:currentUser.name,body,parent_comment_id:replyingToCommentId||null,deleted:false}).select().single();
     if(error)throw error;
     await createNotificationForComment(inserted);
+    await sendPushForComment(commentId);
     await loadComments(currentDiaryId); closeCommentForm();
     await loadNotifications();
   }catch(e){console.error(e);commentMessage.textContent='コメントの投稿に失敗しました。';}
