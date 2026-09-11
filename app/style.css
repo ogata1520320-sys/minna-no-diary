@@ -100,25 +100,26 @@ button:disabled{opacity:.55;cursor:wait}
   gap: 6px;
 }
 
-/* 通知・ログアウトを同じデザインに統一 */
+/* 通知・ログアウトを完全に同じ見た目にする */
 .app-header #enable-push-button,
 .app-header #logout-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  width: auto;
-  min-width: 0;
-  height: auto;
-  min-height: 0;
-  margin: 0;
-  padding: 7px 11px;
-  background: #f0f2f4;
-  color: #555b63;
-  border: 1px solid #e1e4e8;
-  border-radius: 9px;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: normal;
-  white-space: nowrap;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+  padding: 7px 11px !important;
+  background: #f0f2f4 !important;
+  color: #555b63 !important;
+  border: 1px solid #e1e4e8 !important;
+  border-radius: 9px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: normal !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
 }
