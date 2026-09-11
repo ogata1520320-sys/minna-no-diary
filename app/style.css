@@ -93,43 +93,32 @@ button:disabled{opacity:.55;cursor:wait}
   .diary-body-card{padding:0}
   .modal{padding:10px}
 }
-/* ヘッダー通知ボタン */
-.app-header #enable-push-button {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: auto !important;
-  min-width: 0 !important;
-  height: 34px !important;
-  min-height: 34px !important;
-  padding: 0 12px !important;
-  margin: 0 6px 0 0 !important;
-  font-size: 13px !important;
-  line-height: 1 !important;
-  border-radius: 8px !important;
-  white-space: nowrap !important;
-}
-
-/* ヘッダー右側のボタンを完全に縦中央揃え */
+/* ヘッダー右側のボタン */
 .app-header-inner > div {
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* 通知ボタン */
-.app-header #enable-push-button {
-  box-sizing: border-box !important;
-  height: 34px !important;
-  min-height: 34px !important;
-  margin: 0 !important;
-  transform: none !important;
-}
-
-/* ログアウトボタン */
+/* 通知・ログアウトを同じデザインに統一 */
+.app-header #enable-push-button,
 .app-header #logout-button {
-  box-sizing: border-box !important;
-  height: 34px !important;
-  min-height: 34px !important;
-  margin: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 7px 11px;
+  background: #f0f2f4;
+  color: #555b63;
+  border: 1px solid #e1e4e8;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: normal;
+  white-space: nowrap;
 }
