@@ -1,4 +1,8 @@
 const SUPABASE_URL = 'https://hwadprvpvxtbiiuvpsso.supabase.co';
+// Web Push用の公開鍵
+const VAPID_PUBLIC_KEY =
+  'BH7tIw5nGKRPl-h391xF12CPQc7woidvAEWoLkx4UyjcRCVZopcuJ4hXgJ0w7TNha2AFPRlEeHRTl_yBvAOImsU';
+
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ydrTup3LoNdul7KeXWVwwg_raIcSjFy';
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
