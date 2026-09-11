@@ -477,6 +477,9 @@ diaryDeleteButton?.addEventListener('click', async()=>{
 diaryDetailBack.addEventListener('click', async()=>{currentDiaryId=null;showDiaryHome();await loadDiaries(currentDiaryFilter);});
 newDiaryButton.addEventListener('click',()=>startEditor());
 diaryEditorBack.addEventListener('click',async()=>{currentEditingDiaryId=null;showDiaryHome();await loadDiaries(currentDiaryFilter);});
+document
+  .getElementById('enable-push-button')
+  ?.addEventListener('click', enablePushNotifications);
 
 async function saveDiary(status) {
   const title=diaryTitleInput.value.trim(); const body=diaryContentInput.value;
