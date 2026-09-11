@@ -109,3 +109,27 @@ button:disabled{opacity:.55;cursor:wait}
   border-radius: 8px !important;
   white-space: nowrap !important;
 }
+
+/* ヘッダー右側のボタンを完全に縦中央揃え */
+.app-header-inner > div {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+/* 通知ボタン */
+.app-header #enable-push-button {
+  box-sizing: border-box !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+/* ログアウトボタン */
+.app-header #logout-button {
+  box-sizing: border-box !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+}
