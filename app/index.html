@@ -36,6 +36,21 @@
 </section>
 <section id="home-screen" class="hidden">
 <div id="home-user-card" class="card"><h2>ホーム</h2><p id="welcome-message"></p><button type="button" id="new-diary-button">＋ 新しく書く</button></div>
+
+  <div class="card push-notification-box">
+<h2>スマホ通知</h2>
+<p>コメントや返信の通知をスマホで受け取れます。</p>
+<button
+  type="button"
+  id="enable-push-button"
+  class="secondary-button"
+>
+  スマホ通知を有効にする
+</button>
+<p id="push-status" class="message"></p>
+</div>
+
+<div id="notification-section" class="card notification-section">
 <div id="notification-section" class="card notification-section"><div class="notification-section-heading"><h2>通知</h2><span id="notification-count-label" class="notification-count-label"></span></div><div id="notification-list" class="notification-list"><p class="message">通知を読み込んでいます…</p></div></div>
 <div id="diary-detail-header" class="card hidden"><h2 id="diary-detail-header-title"></h2><div id="diary-detail-header-meta" class="diary-detail-meta"></div></div>
 <div class="card diary-page-card">
