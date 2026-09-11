@@ -2,6 +2,118 @@ const SUPABASE_URL = 'https://hwadprvpvxtbiiuvpsso.supabase.co';
 // Web Push用の公開鍵
 const VAPID_PUBLIC_KEY =
   'BH7tIw5nGKRPl-h391xF12CPQc7woidvAEWoLkx4UyjcRCVZopcuJ4hXgJ0w7TNha2AFPRlEeHRTl_yBvAOImsU';
+// Web Push公開鍵をブラウザ用の形式へ変換
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  return Uint8Array.from(
+    [...rawData].map(char => char.charCodeAt(0))
+  );
+}
+
+// スマホ通知を有効化
+async function enablePushNotifications() {
+  if (!currentUser) {
+    alert('ログインしてから実行してください。');
+    return;
+  }
+
+  if (
+    !('serviceWorker' in navigator) ||
+    !('PushManager' in window) ||
+    !('Notification' in window)
+  ) {
+    alert('このブラウザはスマホ通知に対応していません。');
+    return;
+  }
+
+  try {
+    const permission = await Notification.requestPermission();
+
+    if (permission !== 'granted') {
+      alert('通知が許可されませんでした。');
+      return;
+    }
+
+    const registration = await navigator.serviceWorker.register('./sw.js', {
+      scope: './'
+    });
+
+    let subscription =
+      await registration.pushManager.getSubscription();
+
+    if (!subscription) {
+      subscription =
+        await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey:
+            urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
+    }
+
+    const p256dh = subscription.getKey('p256dh');
+    const auth = subscription.getKey('auth');
+
+    const encodeKey = buffer =>
+      btoa(
+        String.fromCharCode(
+          ...new Uint8Array(buffer)
+        )
+      )
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+
+    const endpoint = subscription.endpoint;
+
+    const { data: existing } =
+      await supabaseClient
+        .from('push_subscriptions')
+        .select('id')
+        .eq('endpoint', endpoint)
+        .maybeSingle();
+
+    const subscriptionData = {
+      user_id: currentUser.user_id,
+      endpoint,
+      p256dh: encodeKey(p256dh),
+      auth: encodeKey(auth),
+      created_at: new Date().toISOString()
+    };
+
+    let error;
+
+    if (existing) {
+      ({ error } = await supabaseClient
+        .from('push_subscriptions')
+        .update(subscriptionData)
+        .eq('id', existing.id));
+    } else {
+      ({ error } = await supabaseClient
+        .from('push_subscriptions')
+        .insert({
+          id: crypto.randomUUID(),
+          ...subscriptionData
+        }));
+    }
+
+    if (error) {
+      console.error('Push購読保存エラー:', error);
+      alert('通知設定の保存に失敗しました。');
+      return;
+    }
+
+    alert('スマホ通知を有効にしました。');
+
+  } catch (error) {
+    console.error('スマホ通知設定エラー:', error);
+    alert('スマホ通知の設定に失敗しました。');
+  }
+}
 
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ydrTup3LoNdul7KeXWVwwg_raIcSjFy';
 
