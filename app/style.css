@@ -93,10 +93,17 @@ button:disabled{opacity:.55;cursor:wait}
   .diary-body-card{padding:0}
   .modal{padding:10px}
 }
-#enable-push-button {
-  padding: 6px 10px;
-  font-size: 13px;
-  min-height: auto;
-  height: auto;
-  border-radius: 8px;
+/* ヘッダー通知ボタン */
+.app-header #enable-push-button {
+  display: inline-flex !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 4px 9px !important;
+  margin: 0 6px 0 0 !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  border-radius: 6px !important;
+  white-space: nowrap !important;
 }
