@@ -123,3 +123,75 @@ button:disabled{opacity:.55;cursor:wait}
   white-space: nowrap !important;
   box-shadow: none !important;
 }
+
+/* ================================
+   UI最終調整
+   ================================ */
+
+/* ② 日記タブを横スクロールさせず、画面内に収める */
+.diary-controls {
+  display: flex;
+  width: 100%;
+  overflow: visible;
+  gap: 4px;
+}
+
+.diary-controls button {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  width: 0;
+  padding: 10px 5px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* スマホでも3つのタブを均等配置 */
+@media (max-width: 600px) {
+  .diary-controls {
+    gap: 3px;
+    overflow: visible;
+  }
+
+  .diary-controls button {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    padding: 10px 2px;
+    font-size: 12px;
+  }
+}
+
+/* ③ 新規作成画面の保存・公開ボタン */
+#diary-editor .editor-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+#diary-editor .editor-actions button {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* 日記一覧に戻るボタンを下に独立させる */
+#diary-editor > #diary-editor-back {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  box-sizing: border-box;
+}
+
+/* スマホでもボタンがくっつかないようにする */
+@media (max-width: 600px) {
+  #diary-editor .editor-actions {
+    gap: 8px;
+  }
+
+  #diary-editor .editor-actions button {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  #diary-editor > #diary-editor-back {
+    margin-top: 12px;
+  }
+}
