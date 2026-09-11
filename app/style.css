@@ -93,3 +93,10 @@ button:disabled{opacity:.55;cursor:wait}
   .diary-body-card{padding:0}
   .modal{padding:10px}
 }
+#enable-push-button {
+  padding: 6px 10px;
+  font-size: 13px;
+  min-height: auto;
+  height: auto;
+  border-radius: 8px;
+}
