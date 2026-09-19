@@ -121,7 +121,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLI
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
 });
 
-const $ = id => document.getElementById(id);
+const $ = id => .getElementById(id);
 const loginScreen = $('login-screen');
 const homeScreen = $('home-screen');
 const loginForm = $('login-form');
@@ -163,7 +163,7 @@ const diaryPublishButton = $('diary-publish-button');
 const commentsSection = $('comments-section');
 const commentList = $('comment-list');
 const commentOpenButton = $('comment-open-button');
-const commentForm = document.querySelector('.comment-form');
+const commentForm = .querySelector('.comment-form');
 const commentInput = $('comment-input');
 const commentMessage = $('comment-message');
 const commentSubmitButton = $('comment-submit-button');
@@ -198,7 +198,7 @@ function scrollToTop() {
 }
 
 function scrollToElement(id) {
-  const element = document.getElementById(id);
+  const element = .getElementById(id);
   if (!element) return;
 
   element.scrollIntoView({
@@ -372,7 +372,7 @@ async function loadNotifications() {
   notificationList.innerHTML = '';
 
   notifications.forEach(n => {
-    const item = document.createElement('button');
+    const item = .createElement('button');
     item.type = 'button';
     item.className = 'notification-item';
 
@@ -451,7 +451,7 @@ function showDiaryHome() {
 }
 
 function hideDiaryControls() {
-  document.querySelector('.diary-controls')?.classList.add('hidden');
+  .querySelector('.diary-controls')?.classList.add('hidden');
 }
 
 function showDiaryControls() {
@@ -560,7 +560,7 @@ diaryDetailBack.addEventListener('click', async () => {
 newDiaryButton.addEventListener('click',()=>startEditor());
 diaryEditorBack.addEventListener('click',async()=>{currentEditingDiaryId=null;showDiaryHome();await loadDiaries(currentDiaryFilter);});
 document
-  .('enable-push-button')
+  .getElementById('enable-push-button')
   ?.addEventListener('click', enablePushNotifications);
 
 async function saveDiary(status) {
@@ -723,18 +723,18 @@ function createDiaryDetailActions() {
 
   diaryDetailHeader.appendChild(actions);
 
-  document
-    .('detail-back-button')
-    ?.addEventListener('click', async () => {
+ document
+  .getElementById('detail-back-button')
+  ?.addEventListener('click', async () => {
       currentDiaryId = null;
       showDiaryHome();
       await loadDiaries(currentDiaryFilter);
       scrollToTop();
     });
 
-  document
-    .('detail-comment-button')
-    ?.addEventListener('click', () => {
+ document
+  .getElementById('detail-comment-button')
+  ?.addEventListener('click', () => {
       scrollToElement('comments-section');
     });
 }
@@ -758,8 +758,8 @@ function createEditorTopActions() {
   diaryEditor.insertBefore(actions, diaryEditor.firstChild);
 
   document
-    .('editor-top-back')
-    ?.addEventListener('click', async () => {
+  .getElementById('editor-top-back')
+  ?.addEventListener('click', async () => {
       currentEditingDiaryId = null;
       showDiaryHome();
       await loadDiaries(currentDiaryFilter);
