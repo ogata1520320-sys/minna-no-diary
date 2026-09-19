@@ -808,7 +808,7 @@ function createScrollNav() {
 }
 
 window.addEventListener('scroll', () => {
-  if (!scrollNav) return;
+if (!scrollNav || !currentDiaryId) return;
 
   const currentY = window.scrollY;
 
