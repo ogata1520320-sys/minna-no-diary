@@ -190,6 +190,23 @@ function formatDate(value) {
   return d.toLocaleString('ja-JP', { year:'numeric', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
 }
 
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'auto'
+  });
+}
+
+function scrollToElement(id) {
+  const element = document.getElementById(id);
+  if (!element) return;
+
+  element.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
+}
+
 function contentJsonToText(value) {
   if (Array.isArray(value)) return value.map(x => x?.text ?? '').join('');
   if (typeof value === 'string') {
@@ -307,19 +324,77 @@ logoutButton.addEventListener('click', async () => {
 
 async function loadNotifications() {
   if (!notificationList || !currentUser) return;
-  notificationList.innerHTML = '<p class="message">通知を読み込んでいます…</p>';
+
+  notificationList.innerHTML =
+    '<p class="message">通知を読み込んでいます…</p>';
+
   const { data, error } = await supabaseClient
     .from('notifications')
     .select('notification_id,type,diary_id,comment_id,from_user_id,message,created_at')
     .eq('user_id', currentUser.user_id)
     .order('created_at', { ascending: false })
-    .limit(5);
+    .limit(20);
+
   if (error) {
     console.error(error);
-    notificationList.innerHTML = '<p class="message">通知を取得できませんでした。</p>';
-    if (notificationCountLabel) notificationCountLabel.textContent = '';
+    notificationList.innerHTML =
+      '<p class="message">通知を取得できませんでした。</p>';
+    if (notificationCountLabel) {
+      notificationCountLabel.textContent = '';
+    }
     return;
   }
+
+  const seen = new Set();
+
+  const notifications = (data || []).filter(n => {
+    const key = n.comment_id
+      ? `comment:${n.comment_id}`
+      : `${n.type || ''}:${n.diary_id || ''}:${n.from_user_id || ''}:${n.message || ''}`;
+
+    if (seen.has(key)) return false;
+
+    seen.add(key);
+    return true;
+  }).slice(0, 5);
+
+  if (notificationCountLabel) {
+    notificationCountLabel.textContent =
+      notifications.length ? `最新${notifications.length}件` : '';
+  }
+
+  if (!notifications.length) {
+    notificationList.innerHTML =
+      '<p class="message">新しい通知はありません。</p>';
+    return;
+  }
+
+  notificationList.innerHTML = '';
+
+  notifications.forEach(n => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'notification-item';
+
+    item.innerHTML = `
+      <span class="notification-icon">🔔</span>
+      <span class="notification-main">
+        <span class="notification-message">
+          ${escapeHtml(n.message || 'コメント・返信がありました。')}
+        </span>
+        <span class="notification-time">
+          ${formatDate(n.created_at)}
+        </span>
+      </span>
+    `;
+
+    if (n.diary_id) {
+      item.addEventListener('click', () => openDiary(n.diary_id));
+    }
+
+    notificationList.appendChild(item);
+  });
+}
   const notifications = data || [];
   if (notificationCountLabel) notificationCountLabel.textContent = notifications.length ? `最新${notifications.length}件` : '';
   if (!notifications.length) {
@@ -431,9 +506,23 @@ async function loadDiaries(filter='all') {
   });
 }
 
-allDiariesButton.addEventListener('click', async()=>{showDiaryHome(); await loadDiaries('all');});
-myDiariesButton.addEventListener('click', async()=>{showDiaryHome(); await loadDiaries('mine');});
-draftsButton?.addEventListener('click', async()=>{showDiaryHome(); await loadDiaries('drafts');});
+allDiariesButton.addEventListener('click', async () => {
+  showDiaryHome();
+  await loadDiaries('all');
+  scrollToTop();
+});
+
+myDiariesButton.addEventListener('click', async () => {
+  showDiaryHome();
+  await loadDiaries('mine');
+  scrollToTop();
+});
+
+draftsButton?.addEventListener('click', async () => {
+  showDiaryHome();
+  await loadDiaries('drafts');
+  scrollToTop();
+});
 
 async function openDiary(diaryId) {
   currentDiaryId = diaryId; closeCommentForm(); replyingToCommentId=null;
@@ -442,6 +531,7 @@ async function openDiary(diaryId) {
   if (data.status !== 'published' && data.user_id !== currentUser.user_id) { alert('日記が見つかりません。'); return; }
   homeUserCard.classList.add('hidden'); notificationSection?.classList.add('hidden'); diaryPageTitle.classList.add('hidden'); diaryList.classList.add('hidden'); hideDiaryControls(); diaryDetailHeader.classList.remove('hidden'); diaryDetail.classList.remove('hidden'); diaryEditor.classList.add('hidden');
   diaryDetailHeaderTitle.textContent=data.title || '無題';
+  createDiaryDetailActions();
   diaryDetailHeaderMeta.innerHTML=`<div class="detail-meta-item"><span class="detail-meta-label">名前</span><span class="detail-meta-value">${escapeHtml(data.name || data.user_id)}</span></div><div class="detail-meta-item"><span class="detail-meta-label">日時</span><span class="detail-meta-value">${formatDate(data.updated_at)}</span></div><div class="detail-meta-item"><span class="detail-meta-label">状態</span><span class="detail-meta-value">${data.status==='draft'?'下書き':'公開'}</span></div>`;
   diaryDetailContent.textContent=contentJsonToText(data.content_json);
   const own = currentUser && data.user_id === currentUser.user_id;
@@ -455,7 +545,7 @@ function startEditor(data=null) {
   homeUserCard.classList.add('hidden'); notificationSection?.classList.add('hidden'); diaryPageTitle.classList.add('hidden'); diaryList.classList.add('hidden'); diaryDetailHeader.classList.add('hidden'); diaryDetail.classList.add('hidden'); hideDiaryControls(); commentsSection?.classList.add('hidden'); closeCommentForm();
   diaryEditor.classList.remove('hidden'); diaryEditorTitle.textContent=data?'日記を編集':'新しい日記'; diaryTitleInput.value=data?.title||''; diaryContentInput.value=data?contentJsonToText(data.content_json):''; diaryEditorMessage.textContent='';
 }
-
+createEditorTopActions();
 diaryEditButton?.addEventListener('click', async()=>{
   if (!currentDiaryId || !currentUser) return;
   const { data,error } = await supabaseClient.from('diaries').select('diary_id,user_id,title,content_json,status').eq('diary_id',currentDiaryId).eq('user_id',currentUser.user_id).maybeSingle();
@@ -474,7 +564,12 @@ diaryDeleteButton?.addEventListener('click', async()=>{
   finally { diaryDeleteButton.disabled=false; }
 });
 
-diaryDetailBack.addEventListener('click', async()=>{currentDiaryId=null;showDiaryHome();await loadDiaries(currentDiaryFilter);});
+diaryDetailBack.addEventListener('click', async () => {
+  currentDiaryId = null;
+  showDiaryHome();
+  await loadDiaries(currentDiaryFilter);
+  scrollToTop();
+});;});
 newDiaryButton.addEventListener('click',()=>startEditor());
 diaryEditorBack.addEventListener('click',async()=>{currentEditingDiaryId=null;showDiaryHome();await loadDiaries(currentDiaryFilter);});
 document
@@ -491,11 +586,44 @@ async function saveDiary(status) {
   try {
     const now=new Date().toISOString(); const content_json=[{type:'text',text:body}]; let error;
     if (currentEditingDiaryId) {
-      const patch={title,content_json,status,updated_at:now}; if(status==='published') patch.published_at=undefined;
+     const patch = {
+  title,
+  content_json,
+  status,
+  updated_at: now
+};
+
+if (status === 'published') {
+  patch.published_at = now;
+}
       const result=await supabaseClient.from('diaries').update(patch).eq('diary_id',currentEditingDiaryId).eq('user_id',currentUser.user_id); error=result.error;
     } else {
-      const row={diary_id:generateId(),user_id:currentUser.user_id,name:currentUser.name,title,content_json,status,created_at:now,updated_at:now}; if(status==='published') row.published_at=now;
-      const result=await supabaseClient.from('diaries').insert(row); error=result.error;
+      const newDiaryId = generateId();
+
+const row = {
+  diary_id: newDiaryId,
+  user_id: currentUser.user_id,
+  name: currentUser.name,
+  title,
+  content_json,
+  status,
+  created_at: now,
+  updated_at: now
+};
+
+if (status === 'published') {
+  row.published_at = now;
+}
+
+const result = await supabaseClient
+  .from('diaries')
+  .insert(row);
+
+error = result.error;
+
+if (!error) {
+  currentEditingDiaryId = newDiaryId;
+}
     }
     if(error) throw error;
     const savedId=currentEditingDiaryId; currentEditingDiaryId=null;
@@ -589,5 +717,118 @@ async function deleteComment(commentId){
   if(error){console.error(error);alert('コメントの削除に失敗しました。');return;}
   await loadComments(currentDiaryId);
 }
+function createDiaryDetailActions() {
+  if (!diaryDetailHeader) return;
+  if (document.getElementById('diary-detail-actions')) return;
 
+  const actions = document.createElement('div');
+  actions.id = 'diary-detail-actions';
+
+  actions.innerHTML = `
+    <button type="button" id="detail-back-button" class="secondary-button">
+      ← 日記一覧
+    </button>
+
+    <button type="button" id="detail-comment-button" class="secondary-button">
+      💬 コメントへ
+    </button>
+  `;
+
+  diaryDetailHeader.appendChild(actions);
+
+  document
+    .getElementById('detail-back-button')
+    ?.addEventListener('click', async () => {
+      currentDiaryId = null;
+      showDiaryHome();
+      await loadDiaries(currentDiaryFilter);
+      scrollToTop();
+    });
+
+  document
+    .getElementById('detail-comment-button')
+    ?.addEventListener('click', () => {
+      scrollToElement('comments-section');
+    });
+}
+function createEditorTopActions() {
+  if (!diaryEditor) return;
+  if (document.getElementById('editor-top-actions')) return;
+
+  const actions = document.createElement('div');
+  actions.id = 'editor-top-actions';
+
+  actions.innerHTML = `
+    <button type="button" id="editor-top-back" class="secondary-button">
+      ← 日記一覧
+    </button>
+
+    <button type="button" id="editor-top-edit" class="secondary-button">
+      編集する
+    </button>
+  `;
+
+  diaryEditor.insertBefore(actions, diaryEditor.firstChild);
+
+  document
+    .getElementById('editor-top-back')
+    ?.addEventListener('click', async () => {
+      currentEditingDiaryId = null;
+      showDiaryHome();
+      await loadDiaries(currentDiaryFilter);
+      scrollToTop();
+    });
+
+  document
+    .getElementById('editor-top-edit')
+    ?.addEventListener('click', () => {
+      diaryTitleInput?.focus();
+    });
+}
+let lastScrollY = window.scrollY;
+let scrollNav = null;
+
+function createScrollNav() {
+  if (scrollNav) return;
+
+  scrollNav = document.createElement('div');
+  scrollNav.id = 'scroll-nav';
+
+  scrollNav.innerHTML = `
+    <button type="button" id="scroll-nav-back">
+      ← 日記一覧
+    </button>
+  `;
+
+  document.body.appendChild(scrollNav);
+
+  document
+    .getElementById('scroll-nav-back')
+    ?.addEventListener('click', async () => {
+      currentDiaryId = null;
+      showDiaryHome();
+      await loadDiaries(currentDiaryFilter);
+      scrollToTop();
+    });
+}
+
+window.addEventListener('scroll', () => {
+  if (!scrollNav) return;
+
+  const currentY = window.scrollY;
+
+  if (currentY < lastScrollY && currentY > 80) {
+    scrollNav.classList.add('visible');
+  }
+
+  if (currentY > lastScrollY + 5) {
+    scrollNav.classList.remove('visible');
+  }
+
+  if (currentY <= 20) {
+    scrollNav.classList.remove('visible');
+  }
+
+  lastScrollY = currentY;
+});
 window.addEventListener('DOMContentLoaded',checkLogin);
