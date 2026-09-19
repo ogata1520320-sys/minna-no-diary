@@ -121,7 +121,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLI
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
 });
 
-const $ = id => .getElementById(id);
+const $ = id => document.getElementById(id);
 const loginScreen = $('login-screen');
 const homeScreen = $('home-screen');
 const loginForm = $('login-form');
@@ -163,7 +163,7 @@ const diaryPublishButton = $('diary-publish-button');
 const commentsSection = $('comments-section');
 const commentList = $('comment-list');
 const commentOpenButton = $('comment-open-button');
-const commentForm = .querySelector('.comment-form');
+const commentForm = document.querySelector('.comment-form');
 const commentInput = $('comment-input');
 const commentMessage = $('comment-message');
 const commentSubmitButton = $('comment-submit-button');
@@ -198,7 +198,7 @@ function scrollToTop() {
 }
 
 function scrollToElement(id) {
-  const element = .getElementById(id);
+  const element = document.getElementById(id);
   if (!element) return;
 
   element.scrollIntoView({
@@ -372,7 +372,7 @@ async function loadNotifications() {
   notificationList.innerHTML = '';
 
   notifications.forEach(n => {
-    const item = .createElement('button');
+    const item = document.createElement('button');
     item.type = 'button';
     item.className = 'notification-item';
 
@@ -451,7 +451,7 @@ function showDiaryHome() {
 }
 
 function hideDiaryControls() {
-  .querySelector('.diary-controls')?.classList.add('hidden');
+  document.querySelector('.diary-controls')?.classList.add('hidden');
 }
 
 function showDiaryControls() {
@@ -767,8 +767,8 @@ function createEditorTopActions() {
     });
 
   document
-    .('editor-top-edit')
-    ?.addEventListener('click', () => {
+  .getElementById('editor-top-edit')
+  ?.addEventListener('click', () => {
       diaryTitleInput?.focus();
     });
 }
