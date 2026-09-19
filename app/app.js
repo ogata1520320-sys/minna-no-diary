@@ -121,7 +121,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLI
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
 });
 
-const $ = id => document.getElementById(id);
+const $ = id => document.(id);
 const loginScreen = $('login-screen');
 const homeScreen = $('home-screen');
 const loginForm = $('login-form');
@@ -198,7 +198,7 @@ function scrollToTop() {
 }
 
 function scrollToElement(id) {
-  const element = document.getElementById(id);
+  const element = document.(id);
   if (!element) return;
 
   element.scrollIntoView({
@@ -560,7 +560,7 @@ diaryDetailBack.addEventListener('click', async () => {
 newDiaryButton.addEventListener('click',()=>startEditor());
 diaryEditorBack.addEventListener('click',async()=>{currentEditingDiaryId=null;showDiaryHome();await loadDiaries(currentDiaryFilter);});
 document
-  .getElementById('enable-push-button')
+  .('enable-push-button')
   ?.addEventListener('click', enablePushNotifications);
 
 async function saveDiary(status) {
@@ -706,7 +706,7 @@ async function deleteComment(commentId){
 }
 function createDiaryDetailActions() {
   if (!diaryDetailHeader) return;
-  if (document.getElementById('diary-detail-actions')) return;
+  if (document.('diary-detail-actions')) return;
 
   const actions = document.createElement('div');
   actions.id = 'diary-detail-actions';
@@ -724,7 +724,7 @@ function createDiaryDetailActions() {
   diaryDetailHeader.appendChild(actions);
 
   document
-    .getElementById('detail-back-button')
+    .('detail-back-button')
     ?.addEventListener('click', async () => {
       currentDiaryId = null;
       showDiaryHome();
@@ -733,14 +733,14 @@ function createDiaryDetailActions() {
     });
 
   document
-    .getElementById('detail-comment-button')
+    .('detail-comment-button')
     ?.addEventListener('click', () => {
       scrollToElement('comments-section');
     });
 }
 function createEditorTopActions() {
   if (!diaryEditor) return;
-  if (document.getElementById('editor-top-actions')) return;
+  if (document.('editor-top-actions')) return;
 
   const actions = document.createElement('div');
   actions.id = 'editor-top-actions';
@@ -758,7 +758,7 @@ function createEditorTopActions() {
   diaryEditor.insertBefore(actions, diaryEditor.firstChild);
 
   document
-    .getElementById('editor-top-back')
+    .('editor-top-back')
     ?.addEventListener('click', async () => {
       currentEditingDiaryId = null;
       showDiaryHome();
@@ -767,7 +767,7 @@ function createEditorTopActions() {
     });
 
   document
-    .getElementById('editor-top-edit')
+    .('editor-top-edit')
     ?.addEventListener('click', () => {
       diaryTitleInput?.focus();
     });
@@ -793,13 +793,14 @@ function createScrollNav() {
   document.body.appendChild(scrollNav);
 
   document
-    .getElementById('scroll-nav-back')
-    ?.addEventListener('click', async () => {
-      currentDiaryId = null;
-      showDiaryHome();
-      await loadDiaries(currentDiaryFilter);
-      scrollToTop();
-    });
+   .getElementById('scroll-nav-back')
+  ?.addEventListener('click', async () => {
+    currentDiaryId = null;
+    scrollNav?.classList.remove('visible');
+    showDiaryHome();
+    await loadDiaries(currentDiaryFilter);
+    scrollToTop();
+  });
 
   document
     .getElementById('scroll-nav-comments')
@@ -831,7 +832,36 @@ if (!scrollNav || !currentDiaryId) return;
   lastScrollY = currentY;
 });
 
+window.addEventListener('scroll', () => {
+  if (!scrollNav || !currentDiaryId) {
+    scrollNav?.classList.remove('visible');
+    return;
+  }
 
+  const currentY = window.scrollY;
+
+  // 上方向へスクロールしたら表示
+  if (currentY < lastScrollY && currentY > 80) {
+    scrollNav.classList.add('visible');
+  }
+
+  // 下方向へスクロールしたら非表示
+  if (currentY > lastScrollY + 5) {
+    scrollNav.classList.remove('visible');
+  }
+
+  // ページ最上部では非表示
+  if (currentY <= 20) {
+    scrollNav.classList.remove('visible');
+  }
+
+  lastScrollY = currentY;
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  createScrollNav();
+  checkLogin();
+});
 window.addEventListener('DOMContentLoaded', () => {
   createScrollNav();
   checkLogin();
