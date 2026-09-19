@@ -440,6 +440,7 @@ async function createNotificationForComment(comment) {
 }
 
 function showDiaryHome() {
+    scrollNav?.classList.remove('visible');
   homeUserCard.classList.remove('hidden'); diaryPageTitle.classList.remove('hidden'); diaryList.classList.remove('hidden');
   diaryDetailHeader.classList.add('hidden'); diaryDetail.classList.add('hidden'); diaryEditor.classList.add('hidden');
   allDiariesButton.classList.remove('hidden'); myDiariesButton.classList.remove('hidden'); draftsButton?.classList.remove('hidden');
