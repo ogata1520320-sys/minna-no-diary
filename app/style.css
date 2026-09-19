@@ -228,8 +228,14 @@ button:disabled{opacity:.55;cursor:wait}
   transform: translate(-50%, 0);
 }
 
+#scroll-nav {
+  display: flex;
+  gap: 8px;
+}
+
 #scroll-nav button {
-  width: 100%;
+  flex: 1 1 0;
+  min-width: 0;
   background: #f0f2f4;
   color: #555b63;
   border: 1px solid #e1e4e8;
@@ -237,6 +243,7 @@ button:disabled{opacity:.55;cursor:wait}
   padding: 8px 12px;
   font-size: 13px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 #editor-top-actions {
@@ -251,9 +258,16 @@ button:disabled{opacity:.55;cursor:wait}
 }
 
 @media (max-width: 600px) {
-  #diary-detail-actions {
+  #scroll-nav {
+    padding: 7px 10px;
     gap: 6px;
   }
+
+  #scroll-nav button {
+    padding: 9px 6px;
+    font-size: 12px;
+  }
+}
 
   #diary-detail-actions button,
   #editor-top-actions button {
