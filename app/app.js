@@ -569,7 +569,7 @@ diaryDetailBack.addEventListener('click', async () => {
   showDiaryHome();
   await loadDiaries(currentDiaryFilter);
   scrollToTop();
-});;});
+});
 newDiaryButton.addEventListener('click',()=>startEditor());
 diaryEditorBack.addEventListener('click',async()=>{currentEditingDiaryId=null;showDiaryHome();await loadDiaries(currentDiaryFilter);});
 document
