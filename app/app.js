@@ -509,6 +509,7 @@ draftsButton?.addEventListener('click', async () => {
 });
 
 async function openDiary(diaryId) {
+  scrollToTop();
   currentDiaryId = diaryId; closeCommentForm(); replyingToCommentId=null;
   const { data, error } = await supabaseClient.from('diaries').select('diary_id,user_id,name,title,status,content_json,created_at,updated_at,published_at').eq('diary_id',diaryId).maybeSingle();
   if (error || !data) { console.error(error); alert('日記を取得できませんでした。'); return; }
@@ -525,6 +526,7 @@ async function openDiary(diaryId) {
 }
 
 function startEditor(data=null) {
+  scrollToTop();
   currentEditingDiaryId = data?.diary_id || null;
   homeUserCard.classList.add('hidden'); notificationSection?.classList.add('hidden'); diaryPageTitle.classList.add('hidden'); diaryList.classList.add('hidden'); diaryDetailHeader.classList.add('hidden'); diaryDetail.classList.add('hidden'); hideDiaryControls(); commentsSection?.classList.add('hidden'); closeCommentForm();
   diaryEditor.classList.remove('hidden'); diaryEditorTitle.textContent=data?'日記を編集':'新しい日記'; diaryTitleInput.value=data?.title||''; diaryContentInput.value=data?contentJsonToText(data.content_json):''; diaryEditorMessage.textContent='';
@@ -779,8 +781,11 @@ function createScrollNav() {
   scrollNav.id = 'scroll-nav';
 
   scrollNav.innerHTML = `
-    <button type="button" id="scroll-nav-back">
+    <button type="button" id="scroll-nav-back" class="secondary-button">
       ← 日記一覧
+    </button>
+    <button type="button" id="scroll-nav-comments" class="secondary-button">
+      💬 コメントへ
     </button>
   `;
 
@@ -794,6 +799,12 @@ function createScrollNav() {
       await loadDiaries(currentDiaryFilter);
       scrollToTop();
     });
+
+  document
+    .getElementById('scroll-nav-comments')
+    ?.addEventListener('click', () => {
+      scrollToElement('comments-section');
+    });
 }
 
 window.addEventListener('scroll', () => {
@@ -801,9 +812,23 @@ window.addEventListener('scroll', () => {
 
   const currentY = window.scrollY;
 
+  // 上方向へスクロールしたら表示
   if (currentY < lastScrollY && currentY > 80) {
     scrollNav.classList.add('visible');
   }
+
+  // 下方向へスクロールしたら非表示
+  if (currentY > lastScrollY + 5) {
+    scrollNav.classList.remove('visible');
+  }
+
+  // ページ最上部では非表示
+  if (currentY <= 20) {
+    scrollNav.classList.remove('visible');
+  }
+
+  lastScrollY = currentY;
+});
 
   if (currentY > lastScrollY + 5) {
     scrollNav.classList.remove('visible');
@@ -815,4 +840,7 @@ window.addEventListener('scroll', () => {
 
   lastScrollY = currentY;
 });
-window.addEventListener('DOMContentLoaded',checkLogin);
+window.addEventListener('DOMContentLoaded', () => {
+  createScrollNav();
+  checkLogin();
+});
