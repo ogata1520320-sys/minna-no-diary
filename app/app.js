@@ -830,16 +830,7 @@ window.addEventListener('scroll', () => {
   lastScrollY = currentY;
 });
 
-  if (currentY > lastScrollY + 5) {
-    scrollNav.classList.remove('visible');
-  }
 
-  if (currentY <= 20) {
-    scrollNav.classList.remove('visible');
-  }
-
-  lastScrollY = currentY;
-});
 window.addEventListener('DOMContentLoaded', () => {
   createScrollNav();
   checkLogin();
