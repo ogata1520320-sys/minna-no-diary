@@ -395,22 +395,6 @@ async function loadNotifications() {
     notificationList.appendChild(item);
   });
 }
-  const notifications = data || [];
-  if (notificationCountLabel) notificationCountLabel.textContent = notifications.length ? `最新${notifications.length}件` : '';
-  if (!notifications.length) {
-    notificationList.innerHTML = '<p class="message">新しい通知はありません。</p>';
-    return;
-  }
-  notificationList.innerHTML = '';
-  notifications.forEach(n => {
-    const item = document.createElement('button');
-    item.type = 'button';
-    item.className = 'notification-item';
-    item.innerHTML = `<span class="notification-icon">🔔</span><span class="notification-main"><span class="notification-message">${escapeHtml(n.message || 'コメント・返信がありました。')}</span><span class="notification-time">${formatDate(n.created_at)}</span></span>`;
-    if (n.diary_id) item.addEventListener('click', () => openDiary(n.diary_id));
-    notificationList.appendChild(item);
-  });
-}
 
 async function createNotificationForComment(comment) {
   try {
